@@ -1,0 +1,118 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0a0a0f;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: #6cb6ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #111118;
+  border-right: 1px solid #222;
+  padding: 24px 16px;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar h1 {
+  font-size: 20px;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.sidebar .tagline {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar nav a {
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #bbb;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: #1a1a24;
+  color: #fff;
+  text-decoration: none;
+}
+
+.main-content {
+  margin-left: 220px;
+  flex: 1;
+  padding: 40px;
+}
+
+.example-page {
+  max-width: 900px;
+}
+
+.example-page h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.example-page .description {
+  color: #999;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.scene-container {
+  width: 100%;
+  height: 500px;
+  background: #0d0d14;
+  border: 1px solid #222;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.code-block {
+  background: #111118;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: auto;
+  color: #ccc;
+}
