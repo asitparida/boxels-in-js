@@ -1,21 +1,25 @@
-import { ExamplePage } from './ExamplePage'
+import { ExamplePage, type ExamplePageProps } from './ExamplePage'
 
 const CODE = `import { Boxels } from 'boxels'
 
 const b = new Boxels({
-  voxelSize: 50,
-  gap: 0,
+  voxelSize: 60,
+  gap: 2,
   camera: { rotation: [-25, 35] },
+  style: Boxels.presets.xray(4, 4, 4),
 })
 
-b.addBox({ position: [0, 0, 0], size: [3, 3, 3] })
+b.addBox({ position: [0, 0, 0], size: [4, 4, 4] })
 b.mount(document.getElementById('scene'))`
 
-export function BasicExample() {
+type Props = Omit<ExamplePageProps, 'title' | 'description' | 'code' | 'setup'>
+
+export function BasicExample(props: Props) {
   return (
     <ExamplePage
+      {...props}
       title="Basic"
-      description="A 3x3x3 cube with default styling and orbit controls. Drag to rotate, scroll to zoom."
+      description="Drag to rotate, scroll to zoom."
       code={CODE}
     />
   )

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import { BasicExample } from './components/BasicExample'
 import { RubikExample } from './components/RubikExample'
@@ -5,6 +6,7 @@ import { DataVizExample } from './components/DataVizExample'
 import { ArchitecturalExample } from './components/ArchitecturalExample'
 import { GlassExample } from './components/GlassExample'
 import { PerformanceExample } from './components/PerformanceExample'
+import { ControlsPanel, type ControlsState } from './components/ControlsPanel'
 
 const examples = [
   { path: '/', label: 'Basic', component: BasicExample },
@@ -16,6 +18,13 @@ const examples = [
 ]
 
 export function App() {
+  const [controls, setControls] = useState<ControlsState>({
+    sizeX: 4, sizeY: 4, sizeZ: 4,
+    gap: 2, boxelSize: 60, edgeWidth: 1, preset: 'xray',
+  })
+  const [explodeTrigger, setExplodeTrigger] = useState(0)
+  const [collapseTrigger, setCollapseTrigger] = useState(0)
+
   return (
     <HashRouter>
       <div className="app-layout">
@@ -34,11 +43,29 @@ export function App() {
               </NavLink>
             ))}
           </nav>
+          <div className="sidebar-controls">
+            <ControlsPanel
+              state={controls}
+              onChange={setControls}
+              onExplode={() => setExplodeTrigger((n) => n + 1)}
+              onCollapse={() => setCollapseTrigger((n) => n + 1)}
+            />
+          </div>
         </aside>
         <main className="main-content">
           <Routes>
             {examples.map((ex) => (
-              <Route key={ex.path} path={ex.path} element={<ex.component />} />
+              <Route
+                key={ex.path}
+                path={ex.path}
+                element={
+                  <ex.component
+                    controls={controls}
+                    explodeTrigger={explodeTrigger}
+                    collapseTrigger={collapseTrigger}
+                  />
+                }
+              />
             ))}
           </Routes>
         </main>

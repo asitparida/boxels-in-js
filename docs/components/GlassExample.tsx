@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { ExamplePage } from './ExamplePage'
+import { ExamplePage, type ExamplePageProps } from './ExamplePage'
 import type { Boxels } from 'boxels'
 import type { ControlsState } from './ControlsPanel'
 
@@ -16,7 +16,9 @@ b.addSphere({ center: [2, 2, 2], radius: 1.5, mode: 'subtract' })
 
 b.mount(document.getElementById('scene'))`
 
-export function GlassExample() {
+type Props = Omit<ExamplePageProps, 'title' | 'description' | 'code' | 'setup'>
+
+export function GlassExample(props: Props) {
   const setup = useCallback((b: Boxels, state: ControlsState) => {
     b.addBox({ position: [0, 0, 0], size: [state.sizeX, state.sizeY, state.sizeZ] })
     const cx = Math.floor(state.sizeX / 2)
@@ -30,10 +32,10 @@ export function GlassExample() {
 
   return (
     <ExamplePage
+      {...props}
       title="Glass"
-      description="Translucent boxels with backdrop-filter blur and a carved sphere."
+      description="Translucent boxels with backdrop-filter blur and carved sphere."
       code={CODE}
-      defaultState={{ sizeX: 4, sizeY: 4, sizeZ: 4, boxelSize: 60, gap: 4, preset: 'glass' }}
       setup={setup}
     />
   )

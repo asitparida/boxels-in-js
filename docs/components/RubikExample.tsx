@@ -1,7 +1,4 @@
-import { useCallback } from 'react'
-import { ExamplePage } from './ExamplePage'
-import type { Boxels } from 'boxels'
-import type { ControlsState } from './ControlsPanel'
+import { ExamplePage, type ExamplePageProps } from './ExamplePage'
 
 const CODE = `import { Boxels } from 'boxels'
 
@@ -14,18 +11,15 @@ const b = new Boxels({
 b.addBox({ position: [0, 0, 0], size: [3, 3, 3] })
 b.mount(document.getElementById('scene'))`
 
-export function RubikExample() {
-  const setup = useCallback((b: Boxels, state: ControlsState) => {
-    b.addBox({ position: [0, 0, 0], size: [state.sizeX, state.sizeY, state.sizeZ] })
-  }, [])
+type Props = Omit<ExamplePageProps, 'title' | 'description' | 'code' | 'setup'>
 
+export function RubikExample(props: Props) {
   return (
     <ExamplePage
+      {...props}
       title="Rubik's Cube"
       description="Classic Rubik's cube colors with gap between boxels."
       code={CODE}
-      defaultState={{ gap: 2, preset: 'rubik' }}
-      setup={setup}
     />
   )
 }

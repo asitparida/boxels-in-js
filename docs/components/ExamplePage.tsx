@@ -1,30 +1,26 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { Boxels } from 'boxels'
-import { ControlsPanel, type ControlsState } from './ControlsPanel'
+import { type ControlsState } from './ControlsPanel'
 import { CodeBlock } from './CodeBlock'
 
-interface ExamplePageProps {
+export interface ExamplePageProps {
   title: string
   description: string
   code: string
-  defaultState?: Partial<ControlsState>
+  controls: ControlsState
+  explodeTrigger: number
+  collapseTrigger: number
   setup?: (b: Boxels, state: ControlsState) => void
 }
 
-const DEFAULT_STATE: ControlsState = {
-  sizeX: 3,
-  sizeY: 3,
-  sizeZ: 3,
-  gap: 0,
-  boxelSize: 50,
-  edgeWidth: 1,
-  preset: 'none',
-}
-
-export function ExamplePage({ title, description, code, defaultState, setup }: ExamplePageProps) {
+export function ExamplePage({
+  title, description, code, controls, explodeTrigger, collapseTrigger, setup,
+}: ExamplePageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Boxels | null>(null)
-  const [state, setState] = useState<ControlsState>({ ...DEFAULT_STATE, ...defaultState })
+  const lastExplode = useRef(0)
+  const lastCollapse = useRef(0)
+  const [showCode, setShowCode] = useState(false)
 
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
@@ -33,27 +29,27 @@ export function ExamplePage({ title, description, code, defaultState, setup }: E
       instanceRef.current.unmount()
     }
 
-    const style = state.preset !== 'none'
-      ? Boxels.presets[state.preset as keyof typeof Boxels.presets](state.sizeX, state.sizeY, state.sizeZ)
+    const style = controls.preset !== 'none'
+      ? Boxels.presets[controls.preset as keyof typeof Boxels.presets](controls.sizeX, controls.sizeY, controls.sizeZ)
       : undefined
 
     const b = new Boxels({
-      voxelSize: state.boxelSize,
-      gap: state.gap,
-      edgeWidth: state.edgeWidth,
+      voxelSize: controls.boxelSize,
+      gap: controls.gap,
+      edgeWidth: controls.edgeWidth,
       camera: { rotation: [-25, 35] },
       style,
     })
 
     if (setup) {
-      setup(b, state)
+      setup(b, controls)
     } else {
-      b.addBox({ position: [0, 0, 0], size: [state.sizeX, state.sizeY, state.sizeZ] })
+      b.addBox({ position: [0, 0, 0], size: [controls.sizeX, controls.sizeY, controls.sizeZ] })
     }
 
     b.mount(containerRef.current)
     instanceRef.current = b
-  }, [state, setup])
+  }, [controls, setup])
 
   useEffect(() => {
     rebuild()
@@ -65,30 +61,40 @@ export function ExamplePage({ title, description, code, defaultState, setup }: E
     }
   }, [rebuild])
 
-  const handleExplode = () => {
-    instanceRef.current?.explode({ factor: 2.2, duration: 800 })
-  }
+  useEffect(() => {
+    if (explodeTrigger > lastExplode.current) {
+      instanceRef.current?.explode({ factor: 2.2, duration: 800 })
+    }
+    lastExplode.current = explodeTrigger
+  }, [explodeTrigger])
 
-  const handleCollapse = () => {
-    instanceRef.current?.collapse()
-  }
+  useEffect(() => {
+    if (collapseTrigger > lastCollapse.current) {
+      instanceRef.current?.collapse()
+    }
+    lastCollapse.current = collapseTrigger
+  }, [collapseTrigger])
 
   return (
     <div className="example-page">
-      <div className="example-header">
-        <h2>{title}</h2>
-        <p className="description">{description}</p>
-      </div>
-      <div className="example-body">
+      <div className="scene-area">
+        <div className="scene-header">
+          <span className="scene-title">{title}</span>
+          <span className="scene-desc">{description}</span>
+          <button
+            className="code-toggle"
+            onClick={() => setShowCode(!showCode)}
+          >
+            {showCode ? 'Hide code' : 'Show code'}
+          </button>
+        </div>
         <div ref={containerRef} className="scene-container" />
-        <ControlsPanel
-          state={state}
-          onChange={setState}
-          onExplode={handleExplode}
-          onCollapse={handleCollapse}
-        />
       </div>
-      <CodeBlock code={code} />
+      {showCode && (
+        <div className="code-drawer">
+          <CodeBlock code={code} />
+        </div>
+      )}
     </div>
   )
 }
