@@ -1,0 +1,43 @@
+{
+  "name": "boxels",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/lib/boxels.cjs",
+  "module": "./dist/lib/boxels.mjs",
+  "types": "./dist/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/lib/boxels.mjs",
+      "require": "./dist/lib/boxels.cjs",
+      "types": "./dist/lib/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/lib"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:lib": "vite build --mode lib && tsc -p tsconfig.lib.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1",
+    "vitest": "^3.2.1",
+    "happy-dom": "^18.0.1"
+  }
+}
