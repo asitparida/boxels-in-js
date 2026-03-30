@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { Boxels } from 'boxels'
 import { ControlsPanel, type ControlsState } from './ControlsPanel'
+import { CodeBlock } from './CodeBlock'
 
 interface ExamplePageProps {
   title: string
@@ -87,7 +88,7 @@ export function ExamplePage({ title, description, code, defaultState, setup }: E
           onCollapse={handleCollapse}
         />
       </div>
-      <pre className="code-block">{code}</pre>
+      <CodeBlock code={code} />
     </div>
   )
 }
