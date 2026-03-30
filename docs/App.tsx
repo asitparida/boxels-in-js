@@ -20,7 +20,7 @@ const examples = [
 export function App() {
   const [controls, setControls] = useState<ControlsState>({
     sizeX: 4, sizeY: 4, sizeZ: 4,
-    gap: 2, boxelSize: 60, edgeWidth: 1, preset: 'xray',
+    gap: 2, boxelSize: 60, edgeWidth: 1, preset: 'xray', hue: 220,
   })
   const [explodeTrigger, setExplodeTrigger] = useState(0)
   const [collapseTrigger, setCollapseTrigger] = useState(0)

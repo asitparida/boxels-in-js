@@ -10,6 +10,7 @@ export interface ControlsState {
   boxelSize: number
   edgeWidth: number
   preset: string
+  hue: number
 }
 
 interface ControlsPanelProps {
@@ -49,6 +50,7 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
         <Slider label="Gap" value={state.gap} min={0} max={20} onChange={(v) => update({ gap: v })} />
         <Slider label="Size" value={state.boxelSize} min={10} max={80} onChange={(v) => update({ boxelSize: v })} />
         <Slider label="Edge" value={state.edgeWidth} min={0} max={4} onChange={(v) => update({ edgeWidth: v })} />
+        <Slider label="Hue" value={state.hue} min={0} max={360} onChange={(v) => update({ hue: v })} />
       </div>
 
       <div className="controls-section">

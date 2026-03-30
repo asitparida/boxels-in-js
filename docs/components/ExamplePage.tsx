@@ -1,7 +1,63 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { Boxels } from 'boxels'
+import { Boxels, type BoxelStyle } from 'boxels'
 import { type ControlsState } from './ControlsPanel'
 import { CodeBlock } from './CodeBlock'
+
+function buildStyle(controls: ControlsState): BoxelStyle | undefined {
+  const { preset, hue, sizeX: w, sizeY: h, sizeZ: d } = controls
+  if (preset === 'none') return undefined
+
+  // For presets that support hue shifting, inject the hue value
+  switch (preset) {
+    case 'xray': {
+      const cx = w / 2, cy = h / 2, cz = d / 2
+      const maxDist = Math.sqrt(cx * cx + cy * cy + cz * cz)
+      return {
+        default: (x: number, y: number, z: number) => {
+          const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2)
+          const opacity = 0.1 + (dist / Math.max(maxDist, 1)) * 0.6
+          return {
+            fill: `oklch(0.7 0.12 ${hue})`,
+            stroke: `oklch(0.5 0.12 ${hue})`,
+            opacity,
+          }
+        },
+      }
+    }
+    case 'glass':
+      return {
+        default: {
+          fill: `oklch(0.8 0.06 ${hue} / 0.15)`,
+          stroke: `oklch(0.5 0.08 ${hue} / 0.4)`,
+          opacity: 0.8,
+          backdropFilter: 'blur(4px)',
+        },
+      }
+    case 'neon':
+      return {
+        default: {
+          fill: 'rgba(10, 10, 15, 0.9)',
+          stroke: `oklch(0.8 0.2 ${hue})`,
+          opacity: 1,
+        },
+      }
+    case 'gradient':
+      return {
+        default: (x: number, y: number, z: number) => {
+          const h2 = (hue + (x / Math.max(w, 1)) * 120) % 360
+          const lightness = 0.4 + (y / Math.max(h, 1)) * 0.4
+          const chroma = 0.1 + (z / Math.max(d, 1)) * 0.1
+          return {
+            fill: `oklch(${lightness} ${chroma} ${h2})`,
+            stroke: `oklch(${lightness - 0.1} ${chroma} ${h2})`,
+          }
+        },
+      }
+    default:
+      // For presets that don't use hue (rubik, heerich, wireframe, marble), use as-is
+      return Boxels.presets[preset as keyof typeof Boxels.presets](w, h, d)
+  }
+}
 
 export interface ExamplePageProps {
   title: string
@@ -29,9 +85,7 @@ export function ExamplePage({
       instanceRef.current.unmount()
     }
 
-    const style = controls.preset !== 'none'
-      ? Boxels.presets[controls.preset as keyof typeof Boxels.presets](controls.sizeX, controls.sizeY, controls.sizeZ)
-      : undefined
+    const style = buildStyle(controls)
 
     const b = new Boxels({
       voxelSize: controls.boxelSize,
