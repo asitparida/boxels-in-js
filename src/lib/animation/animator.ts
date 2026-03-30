@@ -29,9 +29,9 @@ export const easings = {
 export function parseCubicBezier(str: string): ((t: number) => number) | null {
   const match = str.match(/cubic-bezier\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/)
   if (!match) return null
-  const [, x1s, y1s, x2s, y2s] = match
-  const x1 = parseFloat(x1s), y1 = parseFloat(y1s)
-  const x2 = parseFloat(x2s), y2 = parseFloat(y2s)
+  const [, _x1s, y1s, _x2s, y2s] = match
+  const y1 = parseFloat(y1s)
+  const y2 = parseFloat(y2s)
   return (t: number) => {
     const ct = 1 - t
     const b1 = 3 * ct * ct * t
