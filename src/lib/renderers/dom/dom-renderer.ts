@@ -78,6 +78,20 @@ export class DOMRenderer implements BoxelRenderer {
 
     const { grid, voxelSize, gap, edgeWidth, edgeColor, globalStyle } = options
 
+    // Center the grid so rotation orbits around the visual center
+    const bounds = grid.getBounds()
+    const offset = voxelSize + gap
+    const centerX = ((bounds.min[0] + bounds.max[0]) / 2) * offset
+    const centerY = ((bounds.min[1] + bounds.max[1]) / 2) * offset
+    const centerZ = ((bounds.min[2] + bounds.max[2]) / 2) * offset
+
+    // Create an inner group that's offset so the center of the grid is at the world origin
+    const groupEl = document.createElement('div')
+    groupEl.style.position = 'absolute'
+    groupEl.style.transformStyle = 'preserve-3d'
+    groupEl.style.transform = `translate3d(${-centerX}px, ${centerY}px, ${-centerZ}px)`
+    this.worldEl.appendChild(groupEl)
+
     grid.forEach((boxel, pos) => {
       const [x, y, z] = pos
       const exposedFaces = getExposedFaces(grid, x, y, z)
@@ -92,7 +106,7 @@ export class DOMRenderer implements BoxelRenderer {
       })
 
       const el = createBoxelElement(pos, voxelSize, gap, faceData, edgeWidth, edgeColor)
-      this.worldEl!.appendChild(el)
+      groupEl.appendChild(el)
     })
   }
 
@@ -114,6 +128,7 @@ export class DOMRenderer implements BoxelRenderer {
 
   setBoxelTransform(key: string, translate: Vec3, scale?: number, opacity?: number): void {
     if (!this.worldEl) return
+    // Search within the world container (which now has a group child)
     const el = this.worldEl.querySelector(`[data-boxel="${key}"]`) as HTMLElement | null
     if (!el) return
     const current = el.style.transform

@@ -69,7 +69,6 @@ export class OrbitControls {
 
     this.rotY += dx * 0.5
     this.rotX -= dy * 0.5
-    this.rotX = Math.max(-90, Math.min(90, this.rotX))
 
     this.onChange({ rotX: this.rotX, rotY: this.rotY, scale: this.scale })
   }

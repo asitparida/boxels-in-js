@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git ls-tree:*)",
+      "Read(//Users/asitparida/Codebases/GitHub/sonify-elements/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/asitparida/Downloads"
+    ]
+  }
+}

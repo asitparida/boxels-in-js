@@ -21,7 +21,7 @@ export function App() {
       <div className="app-layout">
         <aside className="sidebar">
           <h1>boxels</h1>
-          <p className="tagline">Voxels as a design primitive</p>
+          <p className="tagline">3D design primitives</p>
           <nav>
             {examples.map((ex) => (
               <NavLink
