@@ -7,9 +7,9 @@
   "types": "./dist/lib/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/lib/index.d.ts",
       "import": "./dist/lib/boxels.mjs",
-      "require": "./dist/lib/boxels.cjs",
-      "types": "./dist/lib/index.d.ts"
+      "require": "./dist/lib/boxels.cjs"
     }
   },
   "files": [
