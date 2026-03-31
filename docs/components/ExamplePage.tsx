@@ -57,7 +57,7 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
   }
 }
 
-function createLabel(text: string, color: string, transform: string): HTMLDivElement {
+function createLabel(text: string, color: string, x: number, y: number): HTMLDivElement {
   const label = document.createElement('div')
   label.className = 'axis-label'
   label.textContent = text
@@ -65,10 +65,11 @@ function createLabel(text: string, color: string, transform: string): HTMLDivEle
   label.style.color = color
   label.style.fontSize = '16px'
   label.style.fontFamily = "'Geist Mono', monospace"
-  label.style.fontWeight = '600'
-  label.style.transform = transform
+  label.style.fontWeight = '700'
+  // Push forward on Z so it renders in front of cube faces
+  label.style.transform = `translate3d(${x}px, ${y}px, 2px)`
   label.style.pointerEvents = 'none'
-  label.style.textShadow = `0 0 12px ${color}, 0 0 4px rgba(0,0,0,0.8)`
+  label.style.textShadow = `0 0 16px ${color}, 0 2px 8px rgba(0,0,0,0.9)`
   label.style.whiteSpace = 'nowrap'
   return label
 }
@@ -80,46 +81,44 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   group.style.transformStyle = 'preserve-3d'
   group.style.pointerEvents = 'none'
 
-  const xColor = 'rgba(255, 100, 100, 0.5)'
-  const yColor = 'rgba(100, 180, 255, 0.5)'
+  const xColor = 'rgba(255, 100, 100, 0.6)'
+  const yColor = 'rgba(100, 180, 255, 0.6)'
 
   // ── Left-Right axis (X) ──
+  // Push slightly forward on Z so it's always visible
   const xLine = document.createElement('div')
   xLine.style.position = 'absolute'
   xLine.style.width = `${halfLen * 2}px`
   xLine.style.height = '2px'
-  xLine.style.background = `linear-gradient(90deg, transparent, ${xColor} 15%, ${xColor} 85%, transparent)`
-  xLine.style.transform = `translate3d(${-halfLen}px, 0, 0)`
+  xLine.style.background = `linear-gradient(90deg, transparent, ${xColor} 10%, ${xColor} 90%, transparent)`
+  xLine.style.transform = `translate3d(${-halfLen}px, 0px, 2px)`
   group.appendChild(xLine)
 
-  // L label (left, negative X)
-  group.appendChild(createLabel('L', 'rgba(255,100,100,0.7)', `translate3d(${-halfLen - 20}px, -10px, 0)`))
-  // R label (right, positive X)
-  group.appendChild(createLabel('R', 'rgba(255,100,100,0.7)', `translate3d(${halfLen + 8}px, -10px, 0)`))
+  group.appendChild(createLabel('L', xColor, -halfLen - 22, -10))
+  group.appendChild(createLabel('R', xColor, halfLen + 8, -10))
 
-  // ── Top-Bottom axis (Y, goes upward in scene = negative CSS Y) ──
+  // ── Top-Bottom axis (Y) ──
+  // In CSS, negative Y = up (which is "top" in world space)
   const yLine = document.createElement('div')
   yLine.style.position = 'absolute'
   yLine.style.width = '2px'
   yLine.style.height = `${halfLen * 2}px`
-  yLine.style.background = `linear-gradient(180deg, transparent, ${yColor} 15%, ${yColor} 85%, transparent)`
-  yLine.style.transform = `translate3d(0, ${-halfLen}px, 0)`
+  yLine.style.background = `linear-gradient(180deg, transparent, ${yColor} 10%, ${yColor} 90%, transparent)`
+  yLine.style.transform = `translate3d(0px, ${-halfLen}px, 2px)`
   group.appendChild(yLine)
 
-  // T label (top, negative CSS Y = positive world Y)
-  group.appendChild(createLabel('T', 'rgba(100,180,255,0.7)', `translate3d(-10px, ${-halfLen - 24}px, 0)`))
-  // B label (bottom, positive CSS Y = negative world Y)
-  group.appendChild(createLabel('B', 'rgba(100,180,255,0.7)', `translate3d(-10px, ${halfLen + 6}px, 0)`))
+  group.appendChild(createLabel('T', yColor, -10, -halfLen - 26))
+  group.appendChild(createLabel('B', yColor, -10, halfLen + 8))
 
   // Center dot
   const dot = document.createElement('div')
   dot.style.position = 'absolute'
-  dot.style.width = '6px'
-  dot.style.height = '6px'
+  dot.style.width = '8px'
+  dot.style.height = '8px'
   dot.style.borderRadius = '50%'
-  dot.style.background = 'rgba(255,255,255,0.5)'
-  dot.style.boxShadow = '0 0 8px rgba(255,255,255,0.3)'
-  dot.style.transform = 'translate(-3px, -3px)'
+  dot.style.background = 'rgba(255,255,255,0.7)'
+  dot.style.boxShadow = '0 0 12px rgba(255,255,255,0.5)'
+  dot.style.transform = 'translate3d(-4px, -4px, 2px)'
   group.appendChild(dot)
 
   return group
