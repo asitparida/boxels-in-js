@@ -147,8 +147,8 @@ export function ExamplePage({
     // Axes via API
     if (controls.showAxis) b.showAxes()
 
-    // Spin via API (only if click is not enabled)
-    if ((controls.spinX || controls.spinY) && !controls.clickEnabled) {
+    // Spin via API
+    if (controls.spinX || controls.spinY) {
       b.startSpin({
         x: controls.spinX,
         y: controls.spinY,

@@ -197,8 +197,10 @@ export class Boxels {
   // ── Auto-rotate ──
 
   private spinRafId: number | null = null
+  private lastSpinOptions: { x?: boolean; y?: boolean; xDir?: 1 | -1; yDir?: 1 | -1; speed?: number } | null = null
 
   startSpin(options: { x?: boolean; y?: boolean; xDir?: 1 | -1; yDir?: 1 | -1; speed?: number } = {}): void {
+    this.lastSpinOptions = { ...options }
     this.stopSpin()
     const xOn = options.x ?? false
     const yOn = options.y ?? true
@@ -349,9 +351,6 @@ export class Boxels {
     this.clickEnabled = true
     this.clickHandler = handler
 
-    // Stop spin when click is enabled
-    this.stopSpin()
-
     const world = this.renderer.getWorldContainer()
     if (!world) return
 
@@ -367,17 +366,46 @@ export class Boxels {
       const pos = boxelEl.dataset.boxel!.split(',').map(Number) as Vec3
       const face = faceEl.dataset.face!
 
-      // Dip animation: scale down then back
+      // Pause spin during interaction
+      const wasSpinning = this.spinRafId !== null
+      if (wasSpinning) this.stopSpin()
+
+      // Active style: brighten face, add glow
+      const origBg = faceEl.style.backgroundColor
+      const origBorder = faceEl.style.borderColor
+      const origBoxShadow = faceEl.style.boxShadow
+      const origOpacity = faceEl.style.opacity
+      faceEl.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
+      faceEl.style.borderColor = 'rgba(255, 255, 255, 0.8)'
+      faceEl.style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.3)'
+      faceEl.style.opacity = '1'
+      faceEl.style.transition = 'all 0.1s ease-in'
+
+      // Dip animation: scale down then bounce back
       const origTransform = boxelEl.style.transform
       boxelEl.style.transition = 'transform 0.15s ease-in'
       boxelEl.style.transform = origTransform + ' scale(0.85)'
 
       setTimeout(() => {
+        // Bounce back
         boxelEl.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
         boxelEl.style.transform = origTransform
+
+        // Restore face style
+        faceEl.style.transition = 'all 0.3s ease-out'
+        faceEl.style.backgroundColor = origBg
+        faceEl.style.borderColor = origBorder
+        faceEl.style.boxShadow = origBoxShadow
+        faceEl.style.opacity = origOpacity
+
         setTimeout(() => {
           boxelEl.style.transition = ''
-        }, 250)
+          faceEl.style.transition = ''
+          // Resume spin if it was running
+          if (wasSpinning) {
+            this.startSpin(this.lastSpinOptions ?? {})
+          }
+        }, 300)
       }, 150)
 
       this.clickHandler?.({ boxel: pos, face })
