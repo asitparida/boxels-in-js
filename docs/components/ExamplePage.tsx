@@ -7,7 +7,6 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
   const { preset, hue, sizeX: w, sizeY: h, sizeZ: d } = controls
   if (preset === 'none') return undefined
 
-  // For presets that support hue shifting, inject the hue value
   switch (preset) {
     case 'xray': {
       const cx = w / 2, cy = h / 2, cz = d / 2
@@ -54,9 +53,51 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
         },
       }
     default:
-      // For presets that don't use hue (rubik, heerich, wireframe, marble), use as-is
       return Boxels.presets[preset as keyof typeof Boxels.presets](w, h, d)
   }
+}
+
+function createAxisLine(axis: 'x' | 'y', length: number, color: string): HTMLDivElement {
+  const line = document.createElement('div')
+  line.className = `axis-line axis-${axis}`
+  line.style.position = 'absolute'
+  line.style.transformStyle = 'preserve-3d'
+  line.style.pointerEvents = 'none'
+
+  if (axis === 'x') {
+    // Horizontal line (left-right) — this is the axis you rotate AROUND for X spin
+    line.style.width = `${length}px`
+    line.style.height = '2px'
+    line.style.background = `linear-gradient(90deg, transparent, ${color} 20%, ${color} 80%, transparent)`
+    line.style.transform = `translate3d(${-length / 2}px, 0, 0)`
+  } else {
+    // Vertical line (up-down) — this is the axis you rotate AROUND for Y spin
+    line.style.width = '2px'
+    line.style.height = `${length}px`
+    line.style.background = `linear-gradient(180deg, transparent, ${color} 20%, ${color} 80%, transparent)`
+    line.style.transform = `translate3d(0, ${-length / 2}px, 0)`
+  }
+
+  // Add small sphere marker at center
+  const dot = document.createElement('div')
+  dot.style.position = 'absolute'
+  dot.style.width = '6px'
+  dot.style.height = '6px'
+  dot.style.borderRadius = '50%'
+  dot.style.background = color
+  dot.style.boxShadow = `0 0 8px ${color}`
+  if (axis === 'x') {
+    dot.style.left = '50%'
+    dot.style.top = '50%'
+    dot.style.transform = 'translate(-50%, -50%)'
+  } else {
+    dot.style.left = '50%'
+    dot.style.top = '50%'
+    dot.style.transform = 'translate(-50%, -50%)'
+  }
+  line.appendChild(dot)
+
+  return line
 }
 
 export interface ExamplePageProps {
@@ -82,7 +123,11 @@ export function ExamplePage({
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
 
+    // Save current rotation before destroying
     if (instanceRef.current) {
+      const rot = instanceRef.current.getRotation()
+      rotRef.current.rotX = rot.rotX
+      rotRef.current.rotY = rot.rotY
       instanceRef.current.unmount()
     }
 
@@ -104,7 +149,7 @@ export function ExamplePage({
     }
 
     b.mount(containerRef.current)
-    // Restore last known rotation so rebuilds don't reset the view
+    // Restore rotation
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
     instanceRef.current = b
   }, [controls, setup])
@@ -113,11 +158,38 @@ export function ExamplePage({
     rebuild()
     return () => {
       if (instanceRef.current) {
+        const rot = instanceRef.current.getRotation()
+        rotRef.current.rotX = rot.rotX
+        rotRef.current.rotY = rot.rotY
         instanceRef.current.unmount()
         instanceRef.current = null
       }
     }
   }, [rebuild])
+
+  // Axis lines — show when spin is active
+  useEffect(() => {
+    const b = instanceRef.current
+    if (!b) return
+    const world = b.getWorldContainer()
+    if (!world) return
+
+    // Remove existing axis lines
+    world.querySelectorAll('.axis-line').forEach((el) => el.remove())
+
+    const axisLength = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ) * (controls.boxelSize + controls.gap) * 1.8
+
+    if (controls.spinX) {
+      world.appendChild(createAxisLine('x', axisLength, 'rgba(255, 100, 100, 0.6)'))
+    }
+    if (controls.spinY) {
+      world.appendChild(createAxisLine('y', axisLength, 'rgba(100, 180, 255, 0.6)'))
+    }
+
+    return () => {
+      world.querySelectorAll('.axis-line').forEach((el) => el.remove())
+    }
+  }, [controls.spinX, controls.spinY, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap])
 
   useEffect(() => {
     if (explodeTrigger > lastExplode.current) {
@@ -132,7 +204,6 @@ export function ExamplePage({
     const b = instanceRef.current
     if (!b) return
 
-    // Read the latest rotation from the renderer (includes orbit drag changes)
     const current = b.getRotation()
     rotRef.current.rotX = current.rotX
     rotRef.current.rotY = current.rotY

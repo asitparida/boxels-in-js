@@ -158,6 +158,10 @@ export class Boxels {
 
   // ── Camera ──
 
+  getWorldContainer(): HTMLElement | null {
+    return this.renderer.getWorldContainer()
+  }
+
   updateTransform(rotX: number, rotY: number): void {
     this.renderer.updateTransform(rotX, rotY)
   }
