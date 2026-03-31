@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 
-const TEXTURE_NAMES = ['solid', 'hollow', 'glass', 'frosted', 'matte', 'glossy', 'neon', 'paper', 'metal', 'hologram'] as const
+const TEXTURE_NAMES = ['solid', 'hollow', 'glass', 'frosted', 'neon', 'hologram'] as const
 const FACE_OPTIONS = ['all', 'top', 'bottom', 'front', 'back', 'left', 'right'] as const
 
 export interface ControlsState {

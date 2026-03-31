@@ -1,9 +1,9 @@
 import type { BoxelStyle } from '../types'
 
-export type TextureName = 'solid' | 'hollow' | 'glass' | 'frosted' | 'matte' | 'glossy' | 'neon' | 'paper' | 'metal' | 'hologram'
+export type TextureName = 'solid' | 'hollow' | 'glass' | 'frosted' | 'neon' | 'hologram'
 
 export const ALL_TEXTURES: TextureName[] = [
-  'solid', 'hollow', 'glass', 'frosted', 'matte', 'glossy', 'neon', 'paper', 'metal', 'hologram',
+  'solid', 'hollow', 'glass', 'frosted', 'neon', 'hologram',
 ]
 
 /**
