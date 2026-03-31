@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import { BasicExample } from './components/BasicExample'
 import { RubikExample } from './components/RubikExample'
-import { DataVizExample } from './components/DataVizExample'
 import { ArchitecturalExample } from './components/ArchitecturalExample'
 import { GlassExample } from './components/GlassExample'
 import { PerformanceExample } from './components/PerformanceExample'
@@ -11,7 +10,6 @@ import { ControlsPanel, type ControlsState } from './components/ControlsPanel'
 const examples = [
   { path: '/', label: 'Basic', component: BasicExample },
   { path: '/rubik', label: "Rubik's Cube", component: RubikExample },
-  { path: '/data-viz', label: 'Data Viz', component: DataVizExample },
   { path: '/architectural', label: 'Architectural', component: ArchitecturalExample },
   { path: '/glass', label: 'Glass', component: GlassExample },
   { path: '/performance', label: 'Performance', component: PerformanceExample },
