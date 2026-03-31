@@ -13,7 +13,9 @@
       "Bash(git push:*)",
       "Bash(gh run:*)",
       "Bash(npm install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(gh repo:*)",
+      "Bash(npm publish:*)"
     ],
     "additionalDirectories": [
       "/Users/asitparida/Downloads"

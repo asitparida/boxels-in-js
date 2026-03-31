@@ -1,6 +1,6 @@
 {
-  "name": "boxels",
-  "version": "0.1.0",
+  "name": "boxels-in-js",
+  "version": "0.1.0-alpha.1",
   "type": "module",
   "main": "./dist/lib/boxels.cjs",
   "module": "./dist/lib/boxels.mjs",

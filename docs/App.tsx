@@ -9,6 +9,7 @@ import { ArchitecturalExample } from './components/ArchitecturalExample'
 import { GlassExample } from './components/GlassExample'
 import { PerformanceExample } from './components/PerformanceExample'
 import { ControlsPanel, type ControlsState } from './components/ControlsPanel'
+import { TutorialExample } from './components/TutorialExample'
 
 const controlledExamples = [
   { path: '/basic', label: 'Basic', component: BasicExample },
@@ -23,6 +24,7 @@ const allNavItems = [
   { path: '/image-across', label: 'Image Across' },
   { path: '/per-cell', label: 'Per Cell' },
   ...controlledExamples.map(({ path, label }) => ({ path, label })),
+  { path: '/how-it-works', label: 'How It Works' },
 ]
 
 export function App() {
@@ -74,6 +76,7 @@ export function App() {
             <Route path="/" element={<ImagePerFaceExample {...sharedProps} />} />
             <Route path="/image-across" element={<ImageExample {...sharedProps} />} />
             <Route path="/per-cell" element={<ImagePerBoxExample {...sharedProps} />} />
+            <Route path="/how-it-works" element={<TutorialExample />} />
             {controlledExamples.map((ex) => {
               const Comp = ex.component
               return (
