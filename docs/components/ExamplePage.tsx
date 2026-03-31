@@ -185,7 +185,7 @@ export function ExamplePage({
     return () => el.removeEventListener('wheel', handleWheel)
   }, [controls, onControlsChange])
 
-  // Axis lines — show when spin is active
+  // Axis lines — independent toggle, positioned at grid center
   useEffect(() => {
     const b = instanceRef.current
     if (!b) return
@@ -195,19 +195,19 @@ export function ExamplePage({
     // Remove existing axis lines
     world.querySelectorAll('.axis-line').forEach((el) => el.remove())
 
-    const axisLength = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ) * (controls.boxelSize + controls.gap) * 1.8
+    if (!controls.showAxis) return
 
-    if (controls.spinX) {
-      world.appendChild(createAxisLine('x', axisLength, 'rgba(255, 100, 100, 0.6)'))
-    }
-    if (controls.spinY) {
-      world.appendChild(createAxisLine('y', axisLength, 'rgba(100, 180, 255, 0.6)'))
-    }
+    // The group element inside worldEl is already centered at grid origin
+    // We add axis lines to worldEl at (0,0,0) which is the center
+    const axisLength = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ) * (controls.boxelSize + controls.gap) * 2
+
+    world.appendChild(createAxisLine('x', axisLength, 'rgba(255, 100, 100, 0.5)'))
+    world.appendChild(createAxisLine('y', axisLength, 'rgba(100, 180, 255, 0.5)'))
 
     return () => {
       world.querySelectorAll('.axis-line').forEach((el) => el.remove())
     }
-  }, [controls.spinX, controls.spinY, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap])
+  }, [controls.showAxis, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap])
 
   useEffect(() => {
     if (explodeTrigger > lastExplode.current) {
@@ -216,23 +216,25 @@ export function ExamplePage({
     lastExplode.current = explodeTrigger
   }, [explodeTrigger])
 
-  // Auto-rotate — continues from last known rotation
+  // Auto-rotate — reads current rotation each frame so orbit drag composes with spin
   useEffect(() => {
     if (!controls.spinX && !controls.spinY) return
     const b = instanceRef.current
     if (!b) return
 
-    const current = b.getRotation()
-    rotRef.current.rotX = current.rotX
-    rotRef.current.rotY = current.rotY
-
     const speed = controls.spinSpeed * 0.3
     let rafId: number
 
     const tick = () => {
-      if (controls.spinX) rotRef.current.rotX += speed * controls.spinXDir
-      if (controls.spinY) rotRef.current.rotY += speed * controls.spinYDir
-      b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
+      // Read the latest angles (includes any orbit drag changes since last frame)
+      const current = b.getRotation()
+      let rx = current.rotX
+      let ry = current.rotY
+      if (controls.spinX) rx += speed * controls.spinXDir
+      if (controls.spinY) ry += speed * controls.spinYDir
+      b.updateTransform(rx, ry)
+      rotRef.current.rotX = rx
+      rotRef.current.rotY = ry
       rafId = requestAnimationFrame(tick)
     }
     rafId = requestAnimationFrame(tick)

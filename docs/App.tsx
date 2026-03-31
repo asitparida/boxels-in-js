@@ -21,7 +21,7 @@ export function App() {
   const [controls, setControls] = useState<ControlsState>({
     sizeX: 4, sizeY: 4, sizeZ: 4,
     gap: 2, boxelSize: 60, edgeWidth: 1, preset: 'xray', hue: 220, backfaces: false,
-    spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 3,
+    spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 3, showAxis: false,
   })
   const [explodeTrigger, setExplodeTrigger] = useState(0)
   const [collapseTrigger, setCollapseTrigger] = useState(0)

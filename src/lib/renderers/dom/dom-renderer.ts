@@ -126,6 +126,10 @@ export class DOMRenderer implements BoxelRenderer {
   updateTransform(rotX: number, rotY: number): void {
     this.currentRotX = rotX
     this.currentRotY = rotY
+    // Sync orbit controls so drag starts from the current angle
+    if (this.orbitControls) {
+      this.orbitControls.setState(rotX, rotY)
+    }
     if (this.worldEl) {
       this.worldEl.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`
     }

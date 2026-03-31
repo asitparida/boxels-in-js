@@ -52,6 +52,11 @@ export class OrbitControls {
     this.zoomEnabled = false
   }
 
+  setState(rotX: number, rotY: number): void {
+    this.rotX = rotX
+    this.rotY = rotY
+  }
+
   getState(): OrbitState {
     return { rotX: this.rotX, rotY: this.rotY, scale: this.scale }
   }

@@ -17,6 +17,7 @@ export interface ControlsState {
   spinY: boolean
   spinYDir: 1 | -1
   spinSpeed: number
+  showAxis: boolean
 }
 
 interface ControlsPanelProps {
@@ -122,6 +123,15 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
         {(state.spinX || state.spinY) && (
           <Slider label="Speed" value={state.spinSpeed} min={1} max={10} onChange={(v) => update({ spinSpeed: v })} />
         )}
+        <div className="control-row">
+          <span className="control-label">Axis</span>
+          <button
+            className={`toggle-btn ${state.showAxis ? 'active' : ''}`}
+            onClick={() => update({ showAxis: !state.showAxis })}
+          >
+            {state.showAxis ? 'ON' : 'OFF'}
+          </button>
+        </div>
       </div>
 
       <div className="controls-section">
