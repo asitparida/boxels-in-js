@@ -40,6 +40,7 @@ export class DOMRenderer implements BoxelRenderer {
     this.worldEl.style.top = '50%'
     this.worldEl.style.left = '50%'
     this.worldEl.style.transformStyle = 'preserve-3d'
+    this.worldEl.style.willChange = 'transform'
 
     const [rx, ry] = this.options.cameraRotation ?? [-25, 35]
     this.currentRotX = rx

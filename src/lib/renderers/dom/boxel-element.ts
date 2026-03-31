@@ -27,11 +27,15 @@ export function createFaceElement(
   el.style.transform = FACE_TRANSFORMS[face](voxelSize)
   el.style.backfaceVisibility = showBackfaces ? 'visible' : 'hidden'
   el.style.boxSizing = 'border-box'
+  // GPU: promote face to its own compositor layer
+  el.style.willChange = 'transform'
+  el.style.contain = 'layout style paint'
 
   el.style.backgroundColor = style.fill
   el.style.opacity = String(style.opacity)
   if (style.backdropFilter) {
     el.style.backdropFilter = style.backdropFilter
+    el.style.webkitBackdropFilter = style.backdropFilter
   }
   if (style.className) {
     el.className = style.className
@@ -62,6 +66,8 @@ export function createBoxelElement(
   container.style.width = `${voxelSize}px`
   container.style.height = `${voxelSize}px`
   container.style.transformStyle = 'preserve-3d'
+  // GPU: promote boxel container to its own layer for efficient transform updates
+  container.style.willChange = 'transform'
 
   const [x, y, z] = position
   const offset = voxelSize + gap
