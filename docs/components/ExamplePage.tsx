@@ -123,29 +123,28 @@ export function ExamplePage({
     lastExplode.current = explodeTrigger
   }, [explodeTrigger])
 
-  // Auto-rotate
+  // Auto-rotate — starts from current orbit position, supports both axes with direction
   useEffect(() => {
-    if (!controls.autoRotate) return
-    const speed = controls.autoRotateSpeed * 0.3
-    let angle = 0
+    if (!controls.spinX && !controls.spinY) return
+    const b = instanceRef.current
+    if (!b) return
+
+    const current = b.getRotation()
+    let rotX = current.rotX
+    let rotY = current.rotY
+    const speed = controls.spinSpeed * 0.3
     let rafId: number
 
     const tick = () => {
-      angle += speed
-      const b = instanceRef.current
-      if (b) {
-        if (controls.autoRotateAxis === 'y') {
-          b.updateTransform(-25, angle)
-        } else {
-          b.updateTransform(angle, 35)
-        }
-      }
+      if (controls.spinX) rotX += speed * controls.spinXDir
+      if (controls.spinY) rotY += speed * controls.spinYDir
+      b.updateTransform(rotX, rotY)
       rafId = requestAnimationFrame(tick)
     }
     rafId = requestAnimationFrame(tick)
 
     return () => cancelAnimationFrame(rafId)
-  }, [controls.autoRotate, controls.autoRotateAxis, controls.autoRotateSpeed])
+  }, [controls.spinX, controls.spinY, controls.spinXDir, controls.spinYDir, controls.spinSpeed])
 
   useEffect(() => {
     if (collapseTrigger > lastCollapse.current) {

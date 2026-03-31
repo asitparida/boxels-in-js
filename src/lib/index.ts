@@ -162,6 +162,15 @@ export class Boxels {
     this.renderer.updateTransform(rotX, rotY)
   }
 
+  getRotation(): { rotX: number; rotY: number } {
+    const r = this.renderer as import('./renderers/dom/dom-renderer').DOMRenderer
+    if (r.getOrbitState) {
+      const s = r.getOrbitState()
+      return { rotX: s.rotX, rotY: s.rotY }
+    }
+    return { rotX: -25, rotY: 35 }
+  }
+
   // ── Styling ──
 
   styleBox(opts: StyleBoxOptions): void {

@@ -12,9 +12,11 @@ export interface ControlsState {
   preset: string
   hue: number
   backfaces: boolean
-  autoRotate: boolean
-  autoRotateAxis: 'x' | 'y'
-  autoRotateSpeed: number
+  spinX: boolean
+  spinXDir: 1 | -1
+  spinY: boolean
+  spinYDir: 1 | -1
+  spinSpeed: number
 }
 
 interface ControlsPanelProps {
@@ -84,31 +86,41 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
       <div className="controls-section">
         <h4>Animate</h4>
         <div className="control-row">
-          <span className="control-label">Spin</span>
+          <span className="control-label">X</span>
           <button
-            className={`toggle-btn ${state.autoRotate ? 'active' : ''}`}
-            onClick={() => update({ autoRotate: !state.autoRotate })}
+            className={`toggle-btn small ${state.spinX ? 'active' : ''}`}
+            onClick={() => update({ spinX: !state.spinX })}
           >
-            {state.autoRotate ? 'ON' : 'OFF'}
+            {state.spinX ? 'ON' : 'OFF'}
           </button>
+          {state.spinX && (
+            <button
+              className="toggle-btn small"
+              onClick={() => update({ spinXDir: (state.spinXDir === 1 ? -1 : 1) as 1 | -1 })}
+            >
+              {state.spinXDir === 1 ? '→' : '←'}
+            </button>
+          )}
         </div>
-        {state.autoRotate && (
-          <>
-            <div className="control-row">
-              <span className="control-label">Axis</span>
-              <div className="axis-btns">
-                <button
-                  className={`toggle-btn small ${state.autoRotateAxis === 'x' ? 'active' : ''}`}
-                  onClick={() => update({ autoRotateAxis: 'x' })}
-                >X</button>
-                <button
-                  className={`toggle-btn small ${state.autoRotateAxis === 'y' ? 'active' : ''}`}
-                  onClick={() => update({ autoRotateAxis: 'y' })}
-                >Y</button>
-              </div>
-            </div>
-            <Slider label="Speed" value={state.autoRotateSpeed} min={1} max={10} onChange={(v) => update({ autoRotateSpeed: v })} />
-          </>
+        <div className="control-row">
+          <span className="control-label">Y</span>
+          <button
+            className={`toggle-btn small ${state.spinY ? 'active' : ''}`}
+            onClick={() => update({ spinY: !state.spinY })}
+          >
+            {state.spinY ? 'ON' : 'OFF'}
+          </button>
+          {state.spinY && (
+            <button
+              className="toggle-btn small"
+              onClick={() => update({ spinYDir: (state.spinYDir === 1 ? -1 : 1) as 1 | -1 })}
+            >
+              {state.spinYDir === 1 ? '↑' : '↓'}
+            </button>
+          )}
+        </div>
+        {(state.spinX || state.spinY) && (
+          <Slider label="Speed" value={state.spinSpeed} min={1} max={10} onChange={(v) => update({ spinSpeed: v })} />
         )}
       </div>
 

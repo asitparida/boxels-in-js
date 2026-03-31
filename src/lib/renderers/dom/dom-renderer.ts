@@ -150,6 +150,12 @@ export class DOMRenderer implements BoxelRenderer {
     return this.worldEl
   }
 
+  getOrbitState(): { rotX: number; rotY: number; scale: number } {
+    if (this.orbitControls) return this.orbitControls.getState()
+    const [rx, ry] = this.options.cameraRotation ?? [-25, 35]
+    return { rotX: rx, rotY: ry, scale: 1 }
+  }
+
   dispose(): void {
     this.unmount()
   }
