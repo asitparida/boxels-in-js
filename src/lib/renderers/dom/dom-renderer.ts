@@ -76,7 +76,7 @@ export class DOMRenderer implements BoxelRenderer {
 
     this.worldEl.innerHTML = ''
 
-    const { grid, voxelSize, gap, edgeWidth, edgeColor, globalStyle } = options
+    const { grid, voxelSize, gap, edgeWidth, edgeColor, globalStyle, showBackfaces } = options
 
     // Center the grid so rotation orbits around the visual center
     const bounds = grid.getBounds()
@@ -92,20 +92,23 @@ export class DOMRenderer implements BoxelRenderer {
     groupEl.style.transform = `translate3d(${-centerX}px, ${centerY}px, ${-centerZ}px)`
     this.worldEl.appendChild(groupEl)
 
+    const allFaces: import('../../types').FaceName[] = ['top', 'bottom', 'front', 'back', 'left', 'right']
+
     grid.forEach((boxel, pos) => {
       const [x, y, z] = pos
-      const exposedFaces = getExposedFaces(grid, x, y, z)
-      if (exposedFaces.length === 0) return
+      // When showBackfaces is on, render all 6 faces (no culling) for see-through depth
+      const facesToRender = showBackfaces ? allFaces : getExposedFaces(grid, x, y, z)
+      if (facesToRender.length === 0) return
 
-      const faceData = exposedFaces.map((face) => {
-        const edges = gap === 0
+      const faceData = facesToRender.map((face) => {
+        const edges = gap === 0 && !showBackfaces
           ? getEdgeVisibility(grid, x, y, z, face)
           : { left: true, right: true, top: true, bottom: true }
         const style = resolveStyle(face, x, y, z, boxel.style, globalStyle)
         return { name: face, style, edges }
       })
 
-      const el = createBoxelElement(pos, voxelSize, gap, faceData, edgeWidth, edgeColor)
+      const el = createBoxelElement(pos, voxelSize, gap, faceData, edgeWidth, edgeColor, showBackfaces)
       groupEl.appendChild(el)
     })
   }

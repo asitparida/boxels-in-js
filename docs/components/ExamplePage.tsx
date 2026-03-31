@@ -93,6 +93,7 @@ export function ExamplePage({
       edgeWidth: controls.edgeWidth,
       camera: { rotation: [-25, 35] },
       style,
+      showBackfaces: controls.backfaces,
     })
 
     if (setup) {

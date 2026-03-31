@@ -11,6 +11,7 @@ export interface ControlsState {
   edgeWidth: number
   preset: string
   hue: number
+  backfaces: boolean
 }
 
 interface ControlsPanelProps {
@@ -51,6 +52,15 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
         <Slider label="Size" value={state.boxelSize} min={10} max={80} onChange={(v) => update({ boxelSize: v })} />
         <Slider label="Edge" value={state.edgeWidth} min={0} max={4} onChange={(v) => update({ edgeWidth: v })} />
         <Slider label="Hue" value={state.hue} min={0} max={360} onChange={(v) => update({ hue: v })} />
+        <div className="control-row">
+          <span className="control-label">Back</span>
+          <button
+            className={`toggle-btn ${state.backfaces ? 'active' : ''}`}
+            onClick={() => update({ backfaces: !state.backfaces })}
+          >
+            {state.backfaces ? 'ON' : 'OFF'}
+          </button>
+        </div>
       </div>
 
       <div className="controls-section">

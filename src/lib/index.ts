@@ -35,7 +35,7 @@ export class Boxels {
   private grid: BoxelGrid
   private renderer: BoxelRenderer
   private animator: Animator
-  private options: { voxelSize: number; gap: number; edgeWidth: number; edgeColor: string }
+  private options: { voxelSize: number; gap: number; edgeWidth: number; edgeColor: string; showBackfaces: boolean }
   private globalStyle?: BoxelStyle
   private listeners: Map<BoxelEventType, Set<EventCallback>> = new Map()
   private mounted = false
@@ -49,6 +49,7 @@ export class Boxels {
       gap: options.gap ?? 0,
       edgeWidth: options.edgeWidth ?? 1,
       edgeColor: options.edgeColor ?? '#333',
+      showBackfaces: options.showBackfaces ?? false,
     }
     this.globalStyle = options.style
 
@@ -260,6 +261,7 @@ export class Boxels {
       edgeWidth: this.options.edgeWidth,
       edgeColor: this.options.edgeColor,
       globalStyle: this.globalStyle,
+      showBackfaces: this.options.showBackfaces,
     })
     if (!this.eventsBound) {
       this.setupFaceEvents()

@@ -17,6 +17,7 @@ export function createFaceElement(
   edges: EdgeVisibility,
   edgeWidth: number,
   edgeColor: string,
+  showBackfaces?: boolean,
 ): HTMLDivElement {
   const el = document.createElement('div')
   el.dataset.face = face
@@ -24,7 +25,7 @@ export function createFaceElement(
   el.style.width = `${voxelSize}px`
   el.style.height = `${voxelSize}px`
   el.style.transform = FACE_TRANSFORMS[face](voxelSize)
-  el.style.backfaceVisibility = 'hidden'
+  el.style.backfaceVisibility = showBackfaces ? 'visible' : 'hidden'
   el.style.boxSizing = 'border-box'
 
   el.style.backgroundColor = style.fill
@@ -53,6 +54,7 @@ export function createBoxelElement(
   }>,
   edgeWidth: number,
   edgeColor: string,
+  showBackfaces?: boolean,
 ): HTMLDivElement {
   const container = document.createElement('div')
   container.dataset.boxel = `${position[0]},${position[1]},${position[2]}`
@@ -66,7 +68,7 @@ export function createBoxelElement(
   container.style.transform = `translate3d(${x * offset}px, ${-y * offset}px, ${z * offset}px)`
 
   for (const face of faces) {
-    const faceEl = createFaceElement(face.name, voxelSize, face.style, face.edges, edgeWidth, edgeColor)
+    const faceEl = createFaceElement(face.name, voxelSize, face.style, face.edges, edgeWidth, edgeColor, showBackfaces)
     container.appendChild(faceEl)
   }
 

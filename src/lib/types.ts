@@ -109,6 +109,7 @@ export interface BoxelsOptions {
   style?: BoxelStyle
   orbit?: boolean
   zoom?: boolean
+  showBackfaces?: boolean
 }
 
 export interface BoxelEvent {
@@ -186,4 +187,5 @@ export interface RenderOptions {
   edgeWidth: number
   edgeColor: string
   globalStyle?: BoxelStyle
+  showBackfaces?: boolean
 }
