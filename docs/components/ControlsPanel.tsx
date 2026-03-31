@@ -1,6 +1,6 @@
 import { Boxels } from 'boxels'
 
-const PRESET_NAMES = ['none', 'heerich', 'rubik', 'gradient', 'wireframe', 'xray', 'glass', 'marble', 'neon'] as const
+const PRESET_NAMES = ['none', 'rubik', 'gradient', 'wireframe', 'xray', 'glass', 'marble', 'neon'] as const
 
 export interface ControlsState {
   sizeX: number
