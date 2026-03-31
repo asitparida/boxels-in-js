@@ -183,7 +183,7 @@ a:hover {
 
 .scene-container {
   flex: 1;
-  background: url('./bg-2.jpg') center / cover no-repeat;
+  background: url('./bg.jpg') center / cover no-repeat;
   overflow: hidden;
 }
 

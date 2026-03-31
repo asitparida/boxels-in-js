@@ -78,7 +78,7 @@ export function ExamplePage({
       gap: controls.gap,
       edgeWidth: controls.edgeWidth,
       camera: { rotation: [-25, 35] },
-      style,
+      style: setup ? undefined : style,
       showBackfaces: controls.backfaces,
       zoom: false,
     })
