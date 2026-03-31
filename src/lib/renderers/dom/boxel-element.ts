@@ -36,7 +36,7 @@ export function createFaceElement(
   el.style.opacity = String(style.opacity)
   if (style.backdropFilter) {
     el.style.backdropFilter = style.backdropFilter
-    el.style.webkitBackdropFilter = style.backdropFilter
+    ;(el.style as unknown as Record<string, string>)['webkitBackdropFilter'] = style.backdropFilter
   }
   if (style.className) {
     el.className = style.className

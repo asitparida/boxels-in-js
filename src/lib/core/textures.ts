@@ -14,9 +14,9 @@ export function createTextureStyle(
   texture: TextureName,
   hue: number,
   opacity: number = 1,
-  w: number = 1,
-  h: number = 1,
-  d: number = 1,
+  _w: number = 1,
+  _h: number = 1,
+  _d: number = 1,
 ): BoxelStyle {
   const op = opacity
 
@@ -59,27 +59,6 @@ export function createTextureStyle(
         },
       }
 
-    case 'matte':
-      return {
-        default: {
-          fill: `oklch(0.6 0.1 ${hue})`,
-          stroke: 'transparent',
-          opacity: op,
-        },
-      }
-
-    case 'glossy':
-      return {
-        default: (x: number, y: number, _z: number) => {
-          const highlight = 0.55 + (y / Math.max(h, 1)) * 0.3
-          return {
-            fill: `oklch(${highlight} 0.18 ${hue})`,
-            stroke: `oklch(${highlight + 0.1} 0.05 ${hue})`,
-            opacity: op,
-          }
-        },
-      }
-
     case 'neon':
       return {
         default: {
@@ -89,46 +68,5 @@ export function createTextureStyle(
         },
       }
 
-    case 'paper':
-      return {
-        default: (x: number, y: number, z: number) => {
-          const noise = Math.sin(x * 12.98 + y * 78.23 + z * 37.71) * 43758.54
-          const grain = (noise - Math.floor(noise)) * 0.06
-          const lightness = 0.88 + grain
-          return {
-            fill: `oklch(${lightness} 0.015 ${hue})`,
-            stroke: `oklch(${lightness - 0.1} 0.02 ${hue})`,
-            opacity: op,
-          }
-        },
-      }
-
-    case 'metal':
-      return {
-        default: (x: number, y: number, _z: number) => {
-          const gradient = 0.4 + (y / Math.max(h, 1)) * 0.35
-          const shimmer = Math.sin(x * 2.5) * 0.05
-          return {
-            fill: `oklch(${gradient + shimmer} 0.03 ${hue})`,
-            stroke: `oklch(${gradient - 0.1} 0.05 ${hue})`,
-            opacity: op,
-          }
-        },
-      }
-
-    case 'hologram': {
-      return {
-        default: (x: number, y: number, z: number) => {
-          const shift = ((x + y + z) / Math.max(w + h + d, 1)) * 120
-          const h2 = (hue + shift) % 360
-          return {
-            fill: `oklch(0.7 0.15 ${h2} / ${0.3 * op})`,
-            stroke: `oklch(0.6 0.1 ${h2} / ${0.5 * op})`,
-            opacity: Math.min(op, 0.7),
-            backdropFilter: `blur(${Math.round(2 * op)}px)`,
-          }
-        },
-      }
-    }
   }
 }

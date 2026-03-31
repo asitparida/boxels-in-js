@@ -88,7 +88,6 @@ export function ExamplePage({
   const lastCollapse = useRef(0)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
   const [showCode, setShowCode] = useState(true)
-  const [rebuildCount, setRebuildCount] = useState(0)
   const toast = useToast()
 
   const rebuild = useCallback(() => {
@@ -166,7 +165,6 @@ export function ExamplePage({
     }
 
     instanceRef.current = b
-    setRebuildCount((n) => n + 1)
   }, [controls, setup])
 
   useEffect(() => {

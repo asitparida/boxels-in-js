@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 
 export function useToast() {
   const [message, setMessage] = useState<string | null>(null)
-  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const show = useCallback((msg: string) => {
     setMessage(msg)
