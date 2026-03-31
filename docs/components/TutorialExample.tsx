@@ -71,48 +71,54 @@ function Step1() {
 const FACE_SIZE = 80
 const HALF = FACE_SIZE / 2
 
-const faceSteps: { name: string; transform: string; color: string; css: string; desc: string }[] = [
+const faceSteps: { name: string; transform: string; color: string; css: string; desc: string; viewAngle: [number, number] }[] = [
   {
     name: 'front',
     transform: `translateZ(${HALF}px)`,
     color: 'rgba(108,182,255,0.35)',
     css: `translateZ(${HALF}px)`,
-    desc: 'Push forward along Z by half the cube size. This is the simplest — no rotation needed.',
+    desc: 'Push forward along Z. No rotation needed.',
+    viewAngle: [-10, 15],
   },
   {
     name: 'back',
     transform: `rotateY(180deg) translateZ(${HALF}px)`,
     color: 'rgba(108,182,255,0.2)',
     css: `rotateY(180deg) translateZ(${HALF}px)`,
-    desc: 'Rotate 180° around Y to face backward, then push out. The div now faces the opposite direction.',
+    desc: 'Rotate 180° on Y to face backward, push out.',
+    viewAngle: [-10, -160],
   },
   {
     name: 'left',
     transform: `rotateY(-90deg) translateZ(${HALF}px)`,
     color: 'rgba(80,140,220,0.35)',
     css: `rotateY(-90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate -90° around Y to face left, then push out.',
+    desc: 'Rotate -90° on Y to face left, push out.',
+    viewAngle: [-10, -55],
   },
   {
     name: 'right',
     transform: `rotateY(90deg) translateZ(${HALF}px)`,
     color: 'rgba(80,140,220,0.25)',
     css: `rotateY(90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate 90° around Y to face right, then push out.',
+    desc: 'Rotate 90° on Y to face right, push out.',
+    viewAngle: [-10, 120],
   },
   {
     name: 'top',
     transform: `rotateX(90deg) translateZ(${HALF}px)`,
     color: 'rgba(140,200,255,0.4)',
     css: `rotateX(90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate 90° around X to face upward, then push out. Now we use rotateX instead of rotateY.',
+    desc: 'Rotate 90° on X to face upward, push out.',
+    viewAngle: [-60, 25],
   },
   {
     name: 'bottom',
     transform: `rotateX(-90deg) translateZ(${HALF}px)`,
     color: 'rgba(60,100,180,0.3)',
     css: `rotateX(-90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate -90° around X to face downward, then push out. All 6 faces are in place — a cube.',
+    desc: 'Rotate -90° on X to face downward, push out.',
+    viewAngle: [50, 25],
   },
 ]
 
@@ -121,6 +127,7 @@ const faceData = faceSteps.map(({ name, transform, color }) => ({ name, transfor
 
 function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: number }) {
   const half = size / 2
+  const [rx, ry] = face.viewAngle
   return (
     <div style={{
       perspective: '400px',
@@ -134,7 +141,7 @@ function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: numbe
         height: size,
         position: 'relative',
         transformStyle: 'preserve-3d' as const,
-        transform: 'rotateX(-20deg) rotateY(30deg)',
+        transform: `rotateX(${rx}deg) rotateY(${ry}deg)`,
       }}>
         {/* Ghost outline showing the cube boundary */}
         <div style={{
@@ -223,11 +230,31 @@ function Step2() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            gap: 8,
           }}>
             <SingleFaceDemo face={face} size={70} />
-            <p style={{ color: '#666', fontSize: '1rem', marginTop: 8, textAlign: 'center', lineHeight: 1.4 }}>
+            <p style={{ color: '#666', fontSize: '1rem', textAlign: 'center', lineHeight: 1.4 }}>
               {face.desc}
             </p>
+            <pre style={{
+              background: '#080810',
+              border: '1px solid #1a1a22',
+              borderRadius: 4,
+              padding: '6px 10px',
+              fontSize: '1rem',
+              color: '#98c379',
+              width: '100%',
+              margin: 0,
+              whiteSpace: 'pre-wrap',
+            }}>
+{`.${face.name} {
+  position: absolute;
+  width: ${FACE_SIZE}px;
+  height: ${FACE_SIZE}px;
+  transform: ${face.css};
+  backface-visibility: hidden;
+}`}
+            </pre>
           </div>
         ))}
       </div>
