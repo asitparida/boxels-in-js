@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import { ImageExample } from './components/ImageExample'
 import { ImagePerFaceExample } from './components/ImagePerFaceExample'
+import { ImagePerBoxExample } from './components/ImagePerBoxExample'
 import { BasicExample } from './components/BasicExample'
 import { RubikExample } from './components/RubikExample'
 import { ArchitecturalExample } from './components/ArchitecturalExample'
@@ -20,6 +21,7 @@ const controlledExamples = [
 const allNavItems = [
   { path: '/', label: 'Image Across' },
   { path: '/per-face', label: 'Per Face' },
+  { path: '/per-cell', label: 'Per Cell' },
   ...controlledExamples.map(({ path, label }) => ({ path, label })),
 ]
 
@@ -71,6 +73,7 @@ export function App() {
           <Routes>
             <Route path="/" element={<ImageExample {...sharedProps} />} />
             <Route path="/per-face" element={<ImagePerFaceExample {...sharedProps} />} />
+            <Route path="/per-cell" element={<ImagePerBoxExample {...sharedProps} />} />
             {controlledExamples.map((ex) => {
               const Comp = ex.component
               return (

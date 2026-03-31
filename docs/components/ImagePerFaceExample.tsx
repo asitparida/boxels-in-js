@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { Boxels, type FaceName } from 'boxels'
 import { type ControlsState } from './ControlsPanel'
 import { type ExamplePageProps, buildStyle } from './ExamplePage'
@@ -19,7 +19,6 @@ const FACE_ICONS: Record<FaceName, { icon: string; bg: string }> = {
   bottom: { icon: iconTiktok,    bg: '#010101' },
 }
 
-// Render an SVG icon centered on a colored background into a canvas data URL
 function renderIconToDataUrl(svgUrl: string, bgColor: string, size: number): Promise<string> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas')
@@ -28,7 +27,6 @@ function renderIconToDataUrl(svgUrl: string, bgColor: string, size: number): Pro
     const ctx = canvas.getContext('2d')!
     ctx.fillStyle = bgColor
     ctx.fillRect(0, 0, size, size)
-
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
@@ -36,10 +34,7 @@ function renderIconToDataUrl(svgUrl: string, bgColor: string, size: number): Pro
       ctx.drawImage(img, pad, pad, size - pad * 2, size - pad * 2)
       resolve(canvas.toDataURL())
     }
-    img.onerror = () => {
-      // Fallback: just the background color
-      resolve(canvas.toDataURL())
-    }
+    img.onerror = () => resolve(canvas.toDataURL())
     img.src = svgUrl
   })
 }
@@ -50,9 +45,23 @@ export function ImagePerFaceExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Boxels | null>(null)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
+  // Pre-render icons to data URLs once, then reuse
+  const [iconCache, setIconCache] = useState<Record<string, string> | null>(null)
 
-  const rebuild = useCallback(async () => {
-    if (!containerRef.current) return
+  // Pre-render all icons on first mount
+  useEffect(() => {
+    const renderAll = async () => {
+      const cache: Record<string, string> = {}
+      for (const [face, { icon, bg }] of Object.entries(FACE_ICONS)) {
+        cache[face] = await renderIconToDataUrl(icon, bg, 256)
+      }
+      setIconCache(cache)
+    }
+    renderAll()
+  }, [])
+
+  const rebuild = useCallback(() => {
+    if (!containerRef.current || !iconCache) return
 
     if (instanceRef.current) {
       const rot = instanceRef.current.getRotation()
@@ -77,14 +86,13 @@ export function ImagePerFaceExample({ controls }: Props) {
     b.mount(containerRef.current)
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
 
-    // Render each icon onto a colored canvas, then map to faces
-    for (const [face, { icon, bg }] of Object.entries(FACE_ICONS)) {
-      const dataUrl = await renderIconToDataUrl(icon, bg, 256)
+    // Apply cached icons to faces
+    for (const [face, dataUrl] of Object.entries(iconCache)) {
       b.mapImage(dataUrl, face as FaceName)
     }
 
     instanceRef.current = b
-  }, [controls])
+  }, [controls, iconCache])
 
   useEffect(() => {
     rebuild()
@@ -99,6 +107,7 @@ export function ImagePerFaceExample({ controls }: Props) {
     }
   }, [rebuild])
 
+  // Spin
   useEffect(() => {
     if (!controls.spinX && !controls.spinY) return
     const b = instanceRef.current
