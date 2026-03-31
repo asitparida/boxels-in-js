@@ -3,6 +3,7 @@ import { type FaceName } from 'boxels'
 import { type ExamplePageProps, generateCode } from './ExamplePage'
 import { CodeDrawer } from './CodeDrawer'
 import { useBoxelScene } from './useBoxelScene'
+import { useToast, Toast } from './Toast'
 
 import iconX from '../assets/icon-x.svg'
 import iconInstagram from '../assets/icon-instagram.svg'
@@ -46,6 +47,7 @@ export function ImagePerFaceExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [showCode, setShowCode] = useState(true)
   const [iconCache, setIconCache] = useState<Record<string, string> | null>(null)
+  const toast = useToast()
 
   useEffect(() => {
     const renderAll = async () => {
@@ -65,7 +67,11 @@ export function ImagePerFaceExample({ controls }: Props) {
     }
   }, [iconCache])
 
-  useBoxelScene(containerRef, controls, afterMount)
+  const onCellClick = useCallback((info: { boxel: [number, number, number]; face: string }) => {
+    toast.show(`Clicked ${info.face} face at [${info.boxel.join(', ')}]`)
+  }, [toast])
+
+  useBoxelScene(containerRef, controls, afterMount, onCellClick)
 
   const code = generateCode(controls, `b.mapImage('x-icon.png', 'front')
 b.mapImage('github-icon.png', 'back')
@@ -87,6 +93,7 @@ b.mapImage('tiktok-icon.png', 'bottom')`)
         <div ref={containerRef} className="scene-container" />
       </div>
       <CodeDrawer code={code} visible={showCode} />
+      <Toast message={toast.message} onDismiss={toast.dismiss} />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { type FaceName } from 'boxels'
 import { type ExamplePageProps, generateCode } from './ExamplePage'
 import { CodeDrawer } from './CodeDrawer'
 import { useBoxelScene } from './useBoxelScene'
+import { useToast, Toast } from './Toast'
 
 // Import all icons
 import iconX from '../assets/icon-x.svg'
@@ -72,6 +73,7 @@ type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTr
 export function ImagePerBoxExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [showCode, setShowCode] = useState(true)
+  const toast = useToast()
   const [tileCache, setTileCache] = useState<Map<string, string> | null>(null)
 
   // Pre-render all icon+color combos we might need
@@ -112,7 +114,11 @@ export function ImagePerBoxExample({ controls }: Props) {
     })
   }, [tileCache])
 
-  useBoxelScene(containerRef, controls, afterMount)
+  const onCellClick = useCallback((info: { boxel: [number, number, number]; face: string }) => {
+    toast.show(`Clicked ${info.face} face at [${info.boxel.join(', ')}]`)
+  }, [toast])
+
+  useBoxelScene(containerRef, controls, afterMount, onCellClick)
 
   const { sizeX, sizeY, sizeZ } = controls
   const totalCells = (sizeX * sizeY * 2) + (sizeX * sizeZ * 2) + (sizeY * sizeZ * 2)
@@ -135,6 +141,7 @@ b.mapImagePerCell(icons)`)
         <div ref={containerRef} className="scene-container" />
       </div>
       <CodeDrawer code={code} visible={showCode} />
+      <Toast message={toast.message} onDismiss={toast.dismiss} />
     </div>
   )
 }

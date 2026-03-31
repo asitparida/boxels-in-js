@@ -14,6 +14,7 @@ export function useBoxelScene(
   containerRef: React.RefObject<HTMLDivElement | null>,
   controls: ControlsState,
   afterMount?: (b: Boxels) => void,
+  onCellClick?: (info: { boxel: [number, number, number]; face: string }) => void,
 ) {
   const instanceRef = useRef<Boxels | null>(null)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
@@ -86,7 +87,7 @@ export function useBoxelScene(
     // Click via API
     if (controls.clickEnabled) {
       b.enableClick(({ boxel, face }) => {
-        console.log(`Clicked ${face} face at [${boxel.join(', ')}]`)
+        onCellClick?.({ boxel: boxel as [number, number, number], face })
       })
     }
 

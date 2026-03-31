@@ -3,6 +3,7 @@ import { Boxels, type BoxelStyle, type TextureName } from 'boxels'
 import { createTextureStyle } from '../../src/lib/core/textures'
 import { type ControlsState } from './ControlsPanel'
 import { CodeDrawer } from './CodeDrawer'
+import { useToast, Toast } from './Toast'
 
 export function buildStyle(controls: ControlsState): BoxelStyle {
   const { texture, hue, opacity: opPct, sizeX: w, sizeY: h, sizeZ: d } = controls
@@ -88,8 +89,7 @@ export function ExamplePage({
   const rotRef = useRef({ rotX: -25, rotY: 35 })
   const [showCode, setShowCode] = useState(true)
   const [rebuildCount, setRebuildCount] = useState(0)
-  const [toast, setToast] = useState<string | null>(null)
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>()
+  const toast = useToast()
 
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
@@ -161,10 +161,7 @@ export function ExamplePage({
     // Click via API
     if (controls.clickEnabled) {
       b.enableClick(({ boxel, face }) => {
-        const msg = `Clicked ${face} face at [${boxel.join(', ')}]`
-        setToast(msg)
-        clearTimeout(toastTimer.current)
-        toastTimer.current = setTimeout(() => setToast(null), 3000)
+        toast.show(`Clicked ${face} face at [${boxel.join(', ')}]`)
       })
     }
 
@@ -234,12 +231,7 @@ export function ExamplePage({
         <div ref={containerRef} className="scene-container" />
       </div>
       <CodeDrawer code={dynamicCode} visible={showCode} />
-      {toast && (
-        <div className="boxel-toast">
-          <span>{toast}</span>
-          <button onClick={() => setToast(null)}>&times;</button>
-        </div>
-      )}
+      <Toast message={toast.message} onDismiss={toast.dismiss} />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { useRef, useCallback, useState } from 'react'
 import { type ExamplePageProps, generateCode } from './ExamplePage'
 import { CodeDrawer } from './CodeDrawer'
 import { useBoxelScene } from './useBoxelScene'
+import { useToast, Toast } from './Toast'
 
 import landscapeUrl from '../assets/landscape.jpg'
 
@@ -10,11 +11,17 @@ type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTr
 export function ImageExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [showCode, setShowCode] = useState(true)
+  const toast = useToast()
+
   const afterMount = useCallback((b: import('boxels').Boxels) => {
     b.mapImage(landscapeUrl)
   }, [])
 
-  useBoxelScene(containerRef, controls, afterMount)
+  const onCellClick = useCallback((info: { boxel: [number, number, number]; face: string }) => {
+    toast.show(`Clicked ${info.face} face at [${info.boxel.join(', ')}]`)
+  }, [toast])
+
+  useBoxelScene(containerRef, controls, afterMount, onCellClick)
 
   const code = generateCode(controls, `b.mapImage('landscape.jpg')`)
 
@@ -31,6 +38,7 @@ export function ImageExample({ controls }: Props) {
         <div ref={containerRef} className="scene-container" />
       </div>
       <CodeDrawer code={code} visible={showCode} />
+      <Toast message={toast.message} onDismiss={toast.dismiss} />
     </div>
   )
 }

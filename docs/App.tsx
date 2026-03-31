@@ -29,8 +29,8 @@ export function App() {
   const [controls, setControls] = useState<ControlsState>({
     sizeX: 2, sizeY: 2, sizeZ: 2,
     gap: 1, boxelSize: 100, edgeWidth: 1, texture: 'glass', hue: 220, opacity: 70, backfaces: false,
-    spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 1, showAxis: false,
-    imageFace: 'all', imageDataUrl: null, positionPreset: 'center', clickEnabled: false,
+    spinX: false, spinXDir: 1, spinY: true, spinYDir: 1, spinSpeed: 1, showAxis: false,
+    imageFace: 'all', imageDataUrl: null, positionPreset: 'center', clickEnabled: true,
   })
   const [explodeTrigger, setExplodeTrigger] = useState(0)
   const [collapseTrigger, setCollapseTrigger] = useState(0)
