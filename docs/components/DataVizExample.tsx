@@ -5,7 +5,7 @@ import type { ControlsState } from './ControlsPanel'
 
 const CODE = `import { Boxels } from 'boxels'
 
-const b = new Boxels({ voxelSize: 30, gap: 2 })
+const b = new Boxels({ boxelSize: 30, gap: 2 })
 
 const data = [3, 7, 5, 9, 4, 6]
 data.forEach((height, i) => {

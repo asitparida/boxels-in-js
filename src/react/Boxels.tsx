@@ -15,7 +15,7 @@ export interface BoxelsProps {
   lines?: AddLineOptions[]
   style?: BoxelStyle
   gap?: number
-  voxelSize?: number
+  boxelSize?: number
   edgeWidth?: number
   edgeColor?: string
   camera?: BoxelsOptions['camera']
@@ -34,7 +34,7 @@ export function Boxels({
   lines = [],
   style,
   gap = 0,
-  voxelSize = 50,
+  boxelSize = 50,
   edgeWidth = 1,
   edgeColor = '#333',
   camera,
@@ -54,7 +54,7 @@ export function Boxels({
 
     const b = new BoxelsCore({
       renderer: 'dom',
-      voxelSize,
+      boxelSize,
       gap,
       edgeWidth,
       edgeColor,
@@ -71,7 +71,7 @@ export function Boxels({
       b.unmount()
       instanceRef.current = null
     }
-  }, [orbit, zoom, camera?.distance, camera?.rotation?.[0], camera?.rotation?.[1], voxelSize, gap, edgeWidth, edgeColor, style])
+  }, [orbit, zoom, camera?.distance, camera?.rotation?.[0], camera?.rotation?.[1], boxelSize, gap, edgeWidth, edgeColor, style])
 
   useEffect(() => {
     const b = instanceRef.current

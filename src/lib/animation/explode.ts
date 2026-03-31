@@ -20,7 +20,7 @@ export function createExplodeAnimation(
   grid: BoxelGrid,
   renderer: BoxelRenderer,
   animator: Animator,
-  voxelSize: number,
+  boxelSize: number,
   options: {
     factor?: number
     stagger?: number
@@ -58,7 +58,7 @@ export function createExplodeAnimation(
         const key = `${positions[i][0]},${positions[i][1]},${positions[i][2]}`
         renderer.setBoxelTransform(
           key,
-          [ox * t * voxelSize, oy * t * voxelSize, oz * t * voxelSize],
+          [ox * t * boxelSize, oy * t * boxelSize, oz * t * boxelSize],
         )
       }
     },

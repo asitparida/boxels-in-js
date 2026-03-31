@@ -6,7 +6,7 @@ import type { ControlsState } from './ControlsPanel'
 const CODE = `import { Boxels } from 'boxels'
 
 const b = new Boxels({
-  voxelSize: 60,
+  boxelSize: 60,
   gap: 4,
   style: Boxels.presets.glass(4, 4, 4),
 })

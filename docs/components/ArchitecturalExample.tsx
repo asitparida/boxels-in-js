@@ -6,7 +6,7 @@ import type { ControlsState } from './ControlsPanel'
 const CODE = `import { Boxels } from 'boxels'
 
 const b = new Boxels({
-  voxelSize: 40,
+  boxelSize: 40,
   gap: 0,
   style: Boxels.presets.heerich(8, 8, 8),
 })

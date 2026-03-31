@@ -12,7 +12,7 @@ const FACE_TRANSFORMS: Record<FaceName, (size: number) => string> = {
 
 export function createFaceElement(
   face: FaceName,
-  voxelSize: number,
+  boxelSize: number,
   style: ResolvedFaceStyle,
   edges: EdgeVisibility,
   edgeWidth: number,
@@ -22,9 +22,9 @@ export function createFaceElement(
   const el = document.createElement('div')
   el.dataset.face = face
   el.style.position = 'absolute'
-  el.style.width = `${voxelSize}px`
-  el.style.height = `${voxelSize}px`
-  el.style.transform = FACE_TRANSFORMS[face](voxelSize)
+  el.style.width = `${boxelSize}px`
+  el.style.height = `${boxelSize}px`
+  el.style.transform = FACE_TRANSFORMS[face](boxelSize)
   el.style.backfaceVisibility = showBackfaces ? 'visible' : 'hidden'
   el.style.boxSizing = 'border-box'
   // GPU: promote face to its own compositor layer
@@ -49,7 +49,7 @@ export function createFaceElement(
 
 export function createBoxelElement(
   position: Vec3,
-  voxelSize: number,
+  boxelSize: number,
   gap: number,
   faces: Array<{
     name: FaceName
@@ -63,18 +63,18 @@ export function createBoxelElement(
   const container = document.createElement('div')
   container.dataset.boxel = `${position[0]},${position[1]},${position[2]}`
   container.style.position = 'absolute'
-  container.style.width = `${voxelSize}px`
-  container.style.height = `${voxelSize}px`
+  container.style.width = `${boxelSize}px`
+  container.style.height = `${boxelSize}px`
   container.style.transformStyle = 'preserve-3d'
   // GPU: promote boxel container to its own layer for efficient transform updates
   container.style.willChange = 'transform'
 
   const [x, y, z] = position
-  const offset = voxelSize + gap
+  const offset = boxelSize + gap
   container.style.transform = `translate3d(${x * offset}px, ${-y * offset}px, ${z * offset}px)`
 
   for (const face of faces) {
-    const faceEl = createFaceElement(face.name, voxelSize, face.style, face.edges, edgeWidth, edgeColor, showBackfaces)
+    const faceEl = createFaceElement(face.name, boxelSize, face.style, face.edges, edgeWidth, edgeColor, showBackfaces)
     container.appendChild(faceEl)
   }
 

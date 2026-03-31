@@ -3,7 +3,7 @@ import { ExamplePage, type ExamplePageProps } from './ExamplePage'
 const CODE = `import { Boxels } from 'boxels'
 
 const b = new Boxels({
-  voxelSize: 50,
+  boxelSize: 50,
   gap: 2,
   style: Boxels.presets.rubik(3, 3, 3),
 })

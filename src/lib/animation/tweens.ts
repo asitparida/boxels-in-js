@@ -48,7 +48,7 @@ export function createEachTween(
   grid: BoxelGrid,
   renderer: BoxelRenderer,
   animator: Animator,
-  _voxelSize: number,
+  _boxelSize: number,
   callback: AnimateEachCallback,
   options: AnimateEachOptions = {},
 ): AnimationHandle {

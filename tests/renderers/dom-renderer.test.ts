@@ -26,7 +26,7 @@ describe('DOMRenderer', () => {
     grid.setBoxel(0, 0, 0, { position: [0, 0, 0], opaque: true })
     renderer.render({
       grid,
-      voxelSize: 50,
+      boxelSize: 50,
       gap: 0,
       edgeWidth: 1,
       edgeColor: '#333',
@@ -45,7 +45,7 @@ describe('DOMRenderer', () => {
     grid.setBoxel(1, 0, 0, { position: [1, 0, 0], opaque: true })
     renderer.render({
       grid,
-      voxelSize: 50,
+      boxelSize: 50,
       gap: 0,
       edgeWidth: 1,
       edgeColor: '#333',

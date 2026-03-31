@@ -35,7 +35,7 @@ export class Boxels {
   private grid: BoxelGrid
   private renderer: BoxelRenderer
   private animator: Animator
-  private options: { voxelSize: number; gap: number; edgeWidth: number; edgeColor: string; showBackfaces: boolean }
+  private options: { boxelSize: number; gap: number; edgeWidth: number; edgeColor: string; showBackfaces: boolean }
   private globalStyle?: BoxelStyle
   private listeners: Map<BoxelEventType, Set<EventCallback>> = new Map()
   private mounted = false
@@ -45,7 +45,7 @@ export class Boxels {
     this.grid = new BoxelGrid()
     this.animator = new Animator()
     this.options = {
-      voxelSize: options.voxelSize ?? 50,
+      boxelSize: options.boxelSize ?? 50,
       gap: options.gap ?? 0,
       edgeWidth: options.edgeWidth ?? 1,
       edgeColor: options.edgeColor ?? '#333',
@@ -223,7 +223,7 @@ export class Boxels {
   explode(opts: ExplodeOptions = {}): void {
     createExplodeAnimation(
       this.grid, this.renderer, this.animator,
-      this.options.voxelSize, opts,
+      this.options.boxelSize, opts,
     )
   }
 
@@ -252,7 +252,7 @@ export class Boxels {
   animateEach(callback: AnimateEachCallback, opts?: AnimateEachOptions): void {
     createEachTween(
       this.grid, this.renderer, this.animator,
-      this.options.voxelSize, callback, opts,
+      this.options.boxelSize, callback, opts,
     )
   }
 
@@ -275,7 +275,7 @@ export class Boxels {
     if (!this.mounted) return
     this.renderer.render({
       grid: this.grid,
-      voxelSize: this.options.voxelSize,
+      boxelSize: this.options.boxelSize,
       gap: this.options.gap,
       edgeWidth: this.options.edgeWidth,
       edgeColor: this.options.edgeColor,

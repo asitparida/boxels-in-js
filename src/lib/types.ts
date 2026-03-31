@@ -101,7 +101,7 @@ export interface CameraOptions {
 export interface BoxelsOptions {
   renderer?: 'dom'
   container?: HTMLElement
-  voxelSize?: number
+  boxelSize?: number
   gap?: number
   edgeWidth?: number
   edgeColor?: string
@@ -182,7 +182,7 @@ export interface BoxelRenderer {
 
 export interface RenderOptions {
   grid: import('./core/grid').BoxelGrid
-  voxelSize: number
+  boxelSize: number
   gap: number
   edgeWidth: number
   edgeColor: string

@@ -86,20 +86,26 @@ export class DOMRenderer implements BoxelRenderer {
 
     this.worldEl.innerHTML = ''
 
-    const { grid, voxelSize, gap, edgeWidth, edgeColor, globalStyle, showBackfaces } = options
+    const { grid, boxelSize, gap, edgeWidth, edgeColor, globalStyle, showBackfaces } = options
 
-    // Center the grid so rotation orbits around the visual center
+    // Center the grid so rotation orbits around the true visual center.
+    // Each boxel container is positioned at CSS: (x*offset, -y*offset, z*offset)
+    // and has size boxelSize, so its visual center is at:
+    //   CSS X: x*offset + boxelSize/2
+    //   CSS Y: -y*offset + boxelSize/2  (Y is flipped)
+    //   CSS Z: z*offset + boxelSize/2
+    // The group offset negates the midpoint of the bounding box of all visual centers.
     const bounds = grid.getBounds()
-    const offset = voxelSize + gap
-    const centerX = ((bounds.min[0] + bounds.max[0]) / 2) * offset
-    const centerY = ((bounds.min[1] + bounds.max[1]) / 2) * offset
-    const centerZ = ((bounds.min[2] + bounds.max[2]) / 2) * offset
+    const offset = boxelSize + gap
+    const half = boxelSize / 2
+    const centerCssX = (bounds.min[0] * offset + half + bounds.max[0] * offset + half) / 2
+    const centerCssY = (-bounds.max[1] * offset + half + -bounds.min[1] * offset + half) / 2
+    const centerCssZ = (bounds.min[2] * offset + half + bounds.max[2] * offset + half) / 2
 
-    // Create an inner group that's offset so the center of the grid is at the world origin
     const groupEl = document.createElement('div')
     groupEl.style.position = 'absolute'
     groupEl.style.transformStyle = 'preserve-3d'
-    groupEl.style.transform = `translate3d(${-centerX}px, ${centerY}px, ${-centerZ}px)`
+    groupEl.style.transform = `translate3d(${-centerCssX}px, ${-centerCssY}px, ${-centerCssZ}px)`
     this.worldEl.appendChild(groupEl)
 
     const allFaces: import('../../types').FaceName[] = ['top', 'bottom', 'front', 'back', 'left', 'right']
@@ -118,7 +124,7 @@ export class DOMRenderer implements BoxelRenderer {
         return { name: face, style, edges }
       })
 
-      const el = createBoxelElement(pos, voxelSize, gap, faceData, edgeWidth, edgeColor, showBackfaces)
+      const el = createBoxelElement(pos, boxelSize, gap, faceData, edgeWidth, edgeColor, showBackfaces)
       groupEl.appendChild(el)
     })
   }

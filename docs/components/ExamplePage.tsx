@@ -144,6 +144,7 @@ export function ExamplePage({
   const lastCollapse = useRef(0)
   const [showCode, setShowCode] = useState(false)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
+  const [rebuildCount, setRebuildCount] = useState(0)
 
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
@@ -159,7 +160,7 @@ export function ExamplePage({
     const style = buildStyle(controls)
 
     const b = new Boxels({
-      voxelSize: controls.boxelSize,
+      boxelSize: controls.boxelSize,
       gap: controls.gap,
       edgeWidth: controls.edgeWidth,
       camera: { rotation: [-25, 35] },
@@ -178,6 +179,7 @@ export function ExamplePage({
     // Restore rotation
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
     instanceRef.current = b
+    setRebuildCount((n) => n + 1)
   }, [controls, setup])
 
   useEffect(() => {
@@ -232,7 +234,7 @@ export function ExamplePage({
     return () => {
       world.querySelectorAll('.axis-line').forEach((el) => el.remove())
     }
-  }, [controls.showAxis, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap])
+  }, [controls.showAxis, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap, rebuildCount])
 
   useEffect(() => {
     if (explodeTrigger > lastExplode.current) {
