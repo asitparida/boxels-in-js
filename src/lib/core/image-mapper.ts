@@ -2,115 +2,79 @@ import type { FaceName, Vec3 } from '../types'
 import type { BoxelGrid } from './grid'
 import { getExposedFaces } from './edge-fusion'
 
-export interface ImageMapResult {
+export interface FaceImageSlice {
   position: Vec3
   face: FaceName
-  backgroundImage: string
-  backgroundPosition: string
   backgroundSize: string
+  backgroundPosition: string
 }
 
-const CROSS_LAYOUT: Record<FaceName, { row: number; col: number }> = {
-  top:    { row: 0, col: 1 },
-  left:   { row: 1, col: 0 },
-  front:  { row: 1, col: 1 },
-  right:  { row: 1, col: 2 },
-  back:   { row: 1, col: 3 },
-  bottom: { row: 2, col: 1 },
-}
-
-const STRIP_ORDER: FaceName[] = ['front', 'back', 'left', 'right', 'top', 'bottom']
-
-function getFaceUV(
+/**
+ * Compute where a face sits in the 2D grid for its face type.
+ * Returns col/row/cols/rows for CSS background slicing.
+ */
+export function getFaceGridPosition(
   face: FaceName,
   x: number, y: number, z: number,
-  min: Vec3,
-  w: number, h: number, d: number,
-): { u: number; v: number; gridW: number; gridH: number } {
-  const rx = x - min[0]
-  const ry = y - min[1]
-  const rz = z - min[2]
-
+  gridW: number, gridH: number, gridD: number,
+): { col: number; row: number; cols: number; rows: number } {
   switch (face) {
-    case 'front':  return { u: rx, v: h - 1 - ry, gridW: w, gridH: h }
-    case 'back':   return { u: w - 1 - rx, v: h - 1 - ry, gridW: w, gridH: h }
-    case 'left':   return { u: rz, v: h - 1 - ry, gridW: d, gridH: h }
-    case 'right':  return { u: d - 1 - rz, v: h - 1 - ry, gridW: d, gridH: h }
-    case 'top':    return { u: rx, v: rz, gridW: w, gridH: d }
-    case 'bottom': return { u: rx, v: d - 1 - rz, gridW: w, gridH: d }
+    case 'front':  return { col: x, row: gridH - 1 - y, cols: gridW, rows: gridH }
+    case 'back':   return { col: gridW - 1 - x, row: gridH - 1 - y, cols: gridW, rows: gridH }
+    case 'left':   return { col: z, row: gridH - 1 - y, cols: gridD, rows: gridH }
+    case 'right':  return { col: gridD - 1 - z, row: gridH - 1 - y, cols: gridD, rows: gridH }
+    case 'top':    return { col: x, row: z, cols: gridW, rows: gridD }
+    case 'bottom': return { col: x, row: gridD - 1 - z, cols: gridW, rows: gridD }
   }
 }
 
-export function mapImageToFaces(
+/**
+ * Compute CSS background-size and background-position for a face
+ * so that an image is distributed across all faces of that type.
+ */
+export function computeFaceImageSlice(
+  face: FaceName,
+  x: number, y: number, z: number,
+  gridW: number, gridH: number, gridD: number,
+): { backgroundSize: string; backgroundPosition: string } {
+  const { col, row, cols, rows } = getFaceGridPosition(face, x, y, z, gridW, gridH, gridD)
+  return {
+    backgroundSize: `${cols * 100}% ${rows * 100}%`,
+    backgroundPosition: `${cols > 1 ? (col / (cols - 1)) * 100 : 0}% ${rows > 1 ? (row / (rows - 1)) * 100 : 0}%`,
+  }
+}
+
+/**
+ * Compute image slices for all exposed faces in the grid.
+ * Optionally filter to a specific face type.
+ */
+export function computeImageMap(
   grid: BoxelGrid,
-  img: HTMLImageElement | HTMLCanvasElement,
-  layout: 'cross' | 'strip' | 'per-face',
-  faces?: Partial<Record<FaceName, HTMLImageElement | HTMLCanvasElement>>,
-): ImageMapResult[] {
-  const results: ImageMapResult[] = []
+  targetFace?: FaceName,
+): FaceImageSlice[] {
+  const results: FaceImageSlice[] = []
   const bounds = grid.getBounds()
-  const w = bounds.max[0] - bounds.min[0] + 1
-  const h = bounds.max[1] - bounds.min[1] + 1
-  const d = bounds.max[2] - bounds.min[2] + 1
+  const gridW = bounds.max[0] - bounds.min[0] + 1
+  const gridH = bounds.max[1] - bounds.min[1] + 1
+  const gridD = bounds.max[2] - bounds.min[2] + 1
 
   grid.forEach((_boxel, pos) => {
     const [x, y, z] = pos
     const exposed = getExposedFaces(grid, x, y, z)
 
     for (const face of exposed) {
-      let faceImg: HTMLImageElement | HTMLCanvasElement = img
+      if (targetFace && face !== targetFace) continue
 
-      if (layout === 'per-face' && faces?.[face]) {
-        faceImg = faces[face]!
-        const { u, v, gridW, gridH } = getFaceUV(face, x, y, z, bounds.min, w, h, d)
-        const src = faceImg instanceof HTMLCanvasElement
-          ? faceImg.toDataURL()
-          : faceImg.src
+      const rx = x - bounds.min[0]
+      const ry = y - bounds.min[1]
+      const rz = z - bounds.min[2]
 
-        results.push({
-          position: pos,
-          face,
-          backgroundImage: `url(${src})`,
-          backgroundPosition: `${(u / gridW) * 100}% ${(v / gridH) * 100}%`,
-          backgroundSize: `${gridW * 100}% ${gridH * 100}%`,
-        })
-      } else if (layout === 'cross') {
-        const facePos = CROSS_LAYOUT[face]
-        const { u, v, gridW, gridH } = getFaceUV(face, x, y, z, bounds.min, w, h, d)
-        const cellW = 1 / 4
-        const cellH = 1 / 3
-        const bgX = (facePos.col + u / gridW) * cellW
-        const bgY = (facePos.row + v / gridH) * cellH
-
-        const src = faceImg instanceof HTMLCanvasElement
-          ? faceImg.toDataURL()
-          : faceImg.src
-
-        results.push({
-          position: pos,
-          face,
-          backgroundImage: `url(${src})`,
-          backgroundPosition: `${bgX * 100}% ${bgY * 100}%`,
-          backgroundSize: `${(1 / cellW) * gridW * 100}% ${(1 / cellH) * gridH * 100}%`,
-        })
-      } else if (layout === 'strip') {
-        const faceIndex = STRIP_ORDER.indexOf(face)
-        const { u, v, gridW, gridH } = getFaceUV(face, x, y, z, bounds.min, w, h, d)
-        const bgX = (faceIndex + u / gridW) / 6
-        const bgY = v / gridH
-
-        const src = faceImg instanceof HTMLCanvasElement
-          ? faceImg.toDataURL()
-          : faceImg.src
-
-        results.push({
-          position: pos,
-          face,
-          backgroundImage: `url(${src})`,
-          backgroundPosition: `${bgX * 100}% ${bgY * 100}%`,
-          backgroundSize: `${6 * gridW * 100}% ${gridH * 100}%`,
-        })
-      }
+      const slice = computeFaceImageSlice(face, rx, ry, rz, gridW, gridH, gridD)
+      results.push({
+        position: pos,
+        face,
+        ...slice,
+      })
     }
   })
 

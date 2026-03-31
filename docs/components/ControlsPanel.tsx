@@ -1,6 +1,7 @@
-import { Boxels } from 'boxels'
+import { useRef } from 'react'
 
 const PRESET_NAMES = ['none', 'rubik', 'gradient', 'wireframe', 'xray', 'glass', 'marble', 'neon'] as const
+const FACE_OPTIONS = ['all', 'top', 'bottom', 'front', 'back', 'left', 'right'] as const
 
 export interface ControlsState {
   sizeX: number
@@ -18,6 +19,8 @@ export interface ControlsState {
   spinYDir: 1 | -1
   spinSpeed: number
   showAxis: boolean
+  imageFace: 'all' | 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right'
+  imageDataUrl: string | null
 }
 
 interface ControlsPanelProps {
@@ -42,6 +45,17 @@ function Slider({ label, value, min, max, onChange }: {
 
 export function ControlsPanel({ state, onChange, onExplode, onCollapse }: ControlsPanelProps) {
   const update = (patch: Partial<ControlsState>) => onChange({ ...state, ...patch })
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      update({ imageDataUrl: reader.result as string })
+    }
+    reader.readAsDataURL(file)
+  }
 
   return (
     <div className="controls-panel">
@@ -132,6 +146,46 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
             {state.showAxis ? 'ON' : 'OFF'}
           </button>
         </div>
+      </div>
+
+      <div className="controls-section">
+        <h4>Image</h4>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
+        <div className="effects-row">
+          <button className="effect-btn" onClick={() => fileInputRef.current?.click()}>
+            {state.imageDataUrl ? 'Change' : 'Upload'}
+          </button>
+          {state.imageDataUrl && (
+            <button className="effect-btn" onClick={() => update({ imageDataUrl: null })}>
+              Clear
+            </button>
+          )}
+        </div>
+        {state.imageDataUrl && (
+          <>
+            <div className="control-row" style={{ marginTop: 6 }}>
+              <span className="control-label">Face</span>
+              <select
+                className="face-select"
+                value={state.imageFace}
+                onChange={(e) => update({ imageFace: e.target.value as typeof state.imageFace })}
+              >
+                {FACE_OPTIONS.map((f) => (
+                  <option key={f} value={f}>{f}</option>
+                ))}
+              </select>
+            </div>
+            <div className="image-preview">
+              <img src={state.imageDataUrl} alt="preview" />
+            </div>
+          </>
+        )}
       </div>
 
       <div className="controls-section">

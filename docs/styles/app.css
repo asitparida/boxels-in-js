@@ -317,6 +317,31 @@ a:hover {
   border-color: #333;
 }
 
+.face-select {
+  background: #111118;
+  color: #ccc;
+  border: 1px solid #1a1a22;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  font-family: 'Geist Mono', monospace;
+  cursor: pointer;
+}
+
+.image-preview {
+  margin-top: 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #1a1a22;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 48px;
+  object-fit: cover;
+  display: block;
+}
+
 /* ── Code Block ── */
 
 .code-block {

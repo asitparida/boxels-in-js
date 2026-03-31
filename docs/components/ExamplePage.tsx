@@ -195,6 +195,18 @@ export function ExamplePage({
     }
   }, [rebuild])
 
+  // Apply image to faces via library API
+  useEffect(() => {
+    const b = instanceRef.current
+    if (!b) return
+    if (!controls.imageDataUrl) {
+      b.clearImage()
+      return
+    }
+    const targetFace = controls.imageFace === 'all' ? undefined : controls.imageFace
+    b.mapImage(controls.imageDataUrl, targetFace as import('boxels').FaceName | undefined)
+  }, [controls.imageDataUrl, controls.imageFace, rebuildCount])
+
   // Mouse wheel controls boxel size
   useEffect(() => {
     const el = containerRef.current

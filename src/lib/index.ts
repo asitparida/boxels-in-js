@@ -3,14 +3,14 @@ import type {
   AddBoxOptions, AddSphereOptions, AddLineOptions,
   RemoveBoxOptions, RemoveSphereOptions, StyleBoxOptions,
   RotateOptions, ExplodeOptions, LayerRotateOptions, TweenOptions,
-  AnimateEachCallback, AnimateEachOptions, ImageMapOptions,
+  AnimateEachCallback, AnimateEachOptions,
   Boxel, FaceName, BoxelRenderer,
 } from './types'
 import { BoxelGrid } from './core/grid'
 import { applyBoolean } from './core/boolean'
 import { generateBox, generateSphere, generateLine } from './core/geometry'
 import { rotateGrid } from './core/rotation'
-import { mapImageToFaces } from './core/image-mapper'
+import { computeImageMap } from './core/image-mapper'
 import { DOMRenderer } from './renderers/dom/dom-renderer'
 import { Animator } from './animation/animator'
 import { createExplodeAnimation } from './animation/explode'
@@ -23,7 +23,7 @@ export type {
   AddBoxOptions, AddSphereOptions, AddLineOptions,
   RemoveBoxOptions, RemoveSphereOptions, StyleBoxOptions,
   RotateOptions, ExplodeOptions, LayerRotateOptions, TweenOptions,
-  AnimateEachCallback, AnimateEachOptions, ImageMapOptions,
+  AnimateEachCallback, AnimateEachOptions,
   Boxel, FaceName, BoxelRenderer,
 }
 
@@ -190,32 +190,32 @@ export class Boxels {
 
   // ── Image mapping ──
 
-  mapImage(opts: ImageMapOptions): void {
-    const loadAndApply = (img: HTMLImageElement | HTMLCanvasElement) => {
-      const results = mapImageToFaces(this.grid, img, opts.layout, opts.faces as Partial<Record<FaceName, HTMLImageElement | HTMLCanvasElement>> | undefined)
-      const world = this.renderer.getWorldContainer()
-      if (!world) return
-      for (const result of results) {
-        const key = `${result.position[0]},${result.position[1]},${result.position[2]}`
-        const faceEl = world.querySelector(
-          `[data-boxel="${key}"] [data-face="${result.face}"]`,
-        ) as HTMLElement | null
-        if (faceEl) {
-          faceEl.style.backgroundImage = result.backgroundImage
-          faceEl.style.backgroundPosition = result.backgroundPosition
-          faceEl.style.backgroundSize = result.backgroundSize
-        }
+  mapImage(imageUrl: string, targetFace?: FaceName): void {
+    const slices = computeImageMap(this.grid, targetFace)
+    const world = this.renderer.getWorldContainer()
+    if (!world) return
+    for (const slice of slices) {
+      const key = `${slice.position[0]},${slice.position[1]},${slice.position[2]}`
+      const faceEl = world.querySelector(
+        `[data-boxel="${key}"] [data-face="${slice.face}"]`,
+      ) as HTMLElement | null
+      if (faceEl) {
+        faceEl.style.backgroundImage = `url(${imageUrl})`
+        faceEl.style.backgroundSize = slice.backgroundSize
+        faceEl.style.backgroundPosition = slice.backgroundPosition
       }
     }
+  }
 
-    if (typeof opts.src === 'string') {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => loadAndApply(img)
-      img.src = opts.src
-    } else {
-      loadAndApply(opts.src)
-    }
+  clearImage(): void {
+    const world = this.renderer.getWorldContainer()
+    if (!world) return
+    const faces = world.querySelectorAll<HTMLElement>('[data-face]')
+    faces.forEach((el) => {
+      el.style.backgroundImage = ''
+      el.style.backgroundSize = ''
+      el.style.backgroundPosition = ''
+    })
   }
 
   // ── Animation ──
