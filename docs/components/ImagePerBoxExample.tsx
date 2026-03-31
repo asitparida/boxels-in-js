@@ -1,157 +1,116 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
-import { Boxels, type FaceName } from 'boxels'
-import { type ControlsState } from './ControlsPanel'
-import { type ExamplePageProps, buildStyle } from './ExamplePage'
+import { useRef, useEffect, useState, useCallback } from 'react'
+import { type FaceName } from 'boxels'
+import { type ExamplePageProps } from './ExamplePage'
+import { useBoxelScene } from './useBoxelScene'
 
-const ALL_FACES: FaceName[] = ['front', 'back', 'left', 'right', 'top', 'bottom']
+// Import all icons
+import iconX from '../assets/icon-x.svg'
+import iconInstagram from '../assets/icon-instagram.svg'
+import iconGithub from '../assets/icon-github.svg'
+import iconLinkedin from '../assets/icon-linkedin.svg'
+import iconYoutube from '../assets/icon-youtube.svg'
+import iconTiktok from '../assets/icon-tiktok.svg'
+import iconDiscord from '../assets/icon-discord.svg'
+import iconSlack from '../assets/icon-slack.svg'
+import iconReddit from '../assets/icon-reddit.svg'
+import iconSpotify from '../assets/icon-spotify.svg'
+import iconTwitch from '../assets/icon-twitch.svg'
+import iconPinterest from '../assets/icon-pinterest.svg'
+import iconSnapchat from '../assets/icon-snapchat.svg'
+import iconTelegram from '../assets/icon-telegram.svg'
+import iconWhatsapp from '../assets/icon-whatsapp.svg'
+import iconMedium from '../assets/icon-medium.svg'
+import iconDribbble from '../assets/icon-dribbble.svg'
+import iconBehance from '../assets/icon-behance.svg'
+import iconFigma from '../assets/icon-figma.svg'
+import iconNotion from '../assets/icon-notion.svg'
+import iconThreads from '../assets/icon-threads.svg'
+import iconMastodon from '../assets/icon-mastodon.svg'
+import iconBluesky from '../assets/icon-bluesky.svg'
+import iconSignal from '../assets/icon-signal.svg'
 
+const ALL_ICONS = [
+  iconX, iconInstagram, iconGithub, iconLinkedin, iconYoutube, iconTiktok,
+  iconDiscord, iconSlack, iconReddit, iconSpotify, iconTwitch, iconPinterest,
+  iconSnapchat, iconTelegram, iconWhatsapp, iconMedium, iconDribbble, iconBehance,
+  iconFigma, iconNotion, iconThreads, iconMastodon, iconBluesky, iconSignal,
+]
+
+// Each face type gets a consistent background color
 const FACE_COLORS: Record<FaceName, string> = {
-  front:  '#e74c3c',
-  back:   '#3498db',
-  left:   '#2ecc71',
-  right:  '#f39c12',
-  top:    '#9b59b6',
-  bottom: '#1abc9c',
+  front:  '#1a1a2e',
+  back:   '#16213e',
+  left:   '#0f3460',
+  right:  '#1a1a40',
+  top:    '#2d132c',
+  bottom: '#0d0d0d',
 }
 
-// Generate a numbered tile image for a specific cell
-function renderCellTile(
-  face: FaceName,
-  col: number,
-  row: number,
-  cols: number,
-  rows: number,
-  size: number,
-): string {
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
-  const ctx = canvas.getContext('2d')!
-
-  // Background with face color
-  const baseColor = FACE_COLORS[face]
-  ctx.fillStyle = baseColor
-  ctx.fillRect(0, 0, size, size)
-
-  // Slight variation per cell
-  const hueShift = (col * 30 + row * 50) % 60 - 30
-  ctx.fillStyle = `hsla(${hueShift}, 40%, 50%, 0.3)`
-  ctx.fillRect(0, 0, size, size)
-
-  // Cell label
-  ctx.fillStyle = 'rgba(255,255,255,0.9)'
-  ctx.font = `bold ${Math.round(size * 0.2)}px "Geist Mono", monospace`
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  const label = `${face[0].toUpperCase()}${col},${row}`
-  ctx.fillText(label, size / 2, size / 2)
-
-  // Subtle border
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)'
-  ctx.lineWidth = 2
-  ctx.strokeRect(1, 1, size - 2, size - 2)
-
-  return canvas.toDataURL()
+function renderIconToDataUrl(svgUrl: string, bgColor: string, size: number): Promise<string> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')!
+    ctx.fillStyle = bgColor
+    ctx.fillRect(0, 0, size, size)
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const pad = size * 0.2
+      ctx.drawImage(img, pad, pad, size - pad * 2, size - pad * 2)
+      resolve(canvas.toDataURL())
+    }
+    img.onerror = () => resolve(canvas.toDataURL())
+    img.src = svgUrl
+  })
 }
 
 type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTrigger' | 'collapseTrigger'>
 
 export function ImagePerBoxExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const instanceRef = useRef<Boxels | null>(null)
-  const rotRef = useRef({ rotX: -25, rotY: 35 })
+  const [tileCache, setTileCache] = useState<Map<string, string> | null>(null)
 
-  const rebuild = useCallback(() => {
-    if (!containerRef.current) return
-
-    if (instanceRef.current) {
-      const rot = instanceRef.current.getRotation()
-      rotRef.current.rotX = rot.rotX
-      rotRef.current.rotY = rot.rotY
-      instanceRef.current.unmount()
-    }
-
-    const { sizeX, sizeY, sizeZ } = controls
-    const style = buildStyle(controls)
-
-    const b = new Boxels({
-      boxelSize: controls.boxelSize,
-      gap: controls.gap,
-      edgeWidth: controls.edgeWidth,
-      camera: { rotation: [-25, 35] },
-      style,
-      showBackfaces: controls.backfaces,
-      zoom: false,
-    })
-
-    b.addBox({ position: [0, 0, 0], size: [sizeX, sizeY, sizeZ] })
-    b.mount(containerRef.current)
-    b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
-
-    // Apply unique image to every individual face cell
-    const world = b.getWorldContainer()
-    if (world) {
-      const faceEls = world.querySelectorAll<HTMLElement>('[data-face]')
-      faceEls.forEach((faceEl) => {
-        const face = faceEl.dataset.face as FaceName
-        const boxelEl = faceEl.closest('[data-boxel]') as HTMLElement
-        if (!boxelEl) return
-        const [x, y, z] = boxelEl.dataset.boxel!.split(',').map(Number)
-
-        // Determine which grid cell this face occupies
-        let col = 0, row = 0, cols = 1, rows = 1
-        switch (face) {
-          case 'front':  col = x; row = sizeY - 1 - y; cols = sizeX; rows = sizeY; break
-          case 'back':   col = sizeX - 1 - x; row = sizeY - 1 - y; cols = sizeX; rows = sizeY; break
-          case 'left':   col = z; row = sizeY - 1 - y; cols = sizeZ; rows = sizeY; break
-          case 'right':  col = sizeZ - 1 - z; row = sizeY - 1 - y; cols = sizeZ; rows = sizeY; break
-          case 'top':    col = x; row = z; cols = sizeX; rows = sizeZ; break
-          case 'bottom': col = x; row = sizeZ - 1 - z; cols = sizeX; rows = sizeZ; break
+  // Pre-render all icon+color combos we might need
+  useEffect(() => {
+    const renderAll = async () => {
+      const cache = new Map<string, string>()
+      const faces = Object.keys(FACE_COLORS) as FaceName[]
+      for (let i = 0; i < ALL_ICONS.length; i++) {
+        for (const face of faces) {
+          const key = `${i}-${face}`
+          cache.set(key, await renderIconToDataUrl(ALL_ICONS[i], FACE_COLORS[face], 128))
         }
+      }
+      setTileCache(cache)
+    }
+    renderAll()
+  }, [])
 
-        const tile = renderCellTile(face, col, row, cols, rows, 128)
-        faceEl.style.backgroundImage = `url(${tile})`
+  const afterMount = useCallback((b: import('boxels').Boxels) => {
+    if (!tileCache) return
+    const world = b.getWorldContainer()
+    if (!world) return
+
+    const faceEls = world.querySelectorAll<HTMLElement>('[data-face]')
+    let cellIndex = 0
+
+    faceEls.forEach((faceEl) => {
+      const face = faceEl.dataset.face as FaceName
+      const iconIdx = cellIndex % ALL_ICONS.length
+      const key = `${iconIdx}-${face}`
+      const dataUrl = tileCache.get(key)
+      if (dataUrl) {
+        faceEl.style.backgroundImage = `url(${dataUrl})`
         faceEl.style.backgroundSize = 'cover'
         faceEl.style.backgroundPosition = 'center'
-      })
-    }
-
-    instanceRef.current = b
-  }, [controls])
-
-  useEffect(() => {
-    rebuild()
-    return () => {
-      if (instanceRef.current) {
-        const rot = instanceRef.current.getRotation()
-        rotRef.current.rotX = rot.rotX
-        rotRef.current.rotY = rot.rotY
-        instanceRef.current.unmount()
-        instanceRef.current = null
       }
-    }
-  }, [rebuild])
+      cellIndex++
+    })
+  }, [tileCache])
 
-  // Spin
-  useEffect(() => {
-    if (!controls.spinX && !controls.spinY) return
-    const b = instanceRef.current
-    if (!b) return
-    const speed = controls.spinSpeed * 0.3
-    let rafId: number
-    const tick = () => {
-      const cur = b.getRotation()
-      let rx = cur.rotX, ry = cur.rotY
-      if (controls.spinX) rx += speed * controls.spinXDir
-      if (controls.spinY) ry += speed * controls.spinYDir
-      b.updateTransform(rx, ry)
-      rotRef.current.rotX = rx
-      rotRef.current.rotY = ry
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafId)
-  }, [controls.spinX, controls.spinY, controls.spinXDir, controls.spinYDir, controls.spinSpeed])
+  useBoxelScene(containerRef, controls, afterMount)
 
   const { sizeX, sizeY, sizeZ } = controls
   const totalCells = (sizeX * sizeY * 2) + (sizeX * sizeZ * 2) + (sizeY * sizeZ * 2)
@@ -162,7 +121,7 @@ export function ImagePerBoxExample({ controls }: Props) {
         <div className="scene-header">
           <span className="scene-title">Per Cell</span>
           <span className="scene-desc">
-            {totalCells} unique images — one per exposed face cell
+            {totalCells} cells — {ALL_ICONS.length} social icons distributed with color per face
           </span>
         </div>
         <div ref={containerRef} className="scene-container" />

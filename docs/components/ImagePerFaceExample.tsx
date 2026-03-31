@@ -1,7 +1,7 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
-import { Boxels, type FaceName } from 'boxels'
-import { type ControlsState } from './ControlsPanel'
-import { type ExamplePageProps, buildStyle } from './ExamplePage'
+import { useRef, useEffect, useState, useCallback } from 'react'
+import { type FaceName } from 'boxels'
+import { type ExamplePageProps } from './ExamplePage'
+import { useBoxelScene } from './useBoxelScene'
 
 import iconX from '../assets/icon-x.svg'
 import iconInstagram from '../assets/icon-instagram.svg'
@@ -43,12 +43,8 @@ type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTr
 
 export function ImagePerFaceExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const instanceRef = useRef<Boxels | null>(null)
-  const rotRef = useRef({ rotX: -25, rotY: 35 })
-  // Pre-render icons to data URLs once, then reuse
   const [iconCache, setIconCache] = useState<Record<string, string> | null>(null)
 
-  // Pre-render all icons on first mount
   useEffect(() => {
     const renderAll = async () => {
       const cache: Record<string, string> = {}
@@ -60,73 +56,14 @@ export function ImagePerFaceExample({ controls }: Props) {
     renderAll()
   }, [])
 
-  const rebuild = useCallback(() => {
-    if (!containerRef.current || !iconCache) return
-
-    if (instanceRef.current) {
-      const rot = instanceRef.current.getRotation()
-      rotRef.current.rotX = rot.rotX
-      rotRef.current.rotY = rot.rotY
-      instanceRef.current.unmount()
-    }
-
-    const style = buildStyle(controls)
-
-    const b = new Boxels({
-      boxelSize: controls.boxelSize,
-      gap: controls.gap,
-      edgeWidth: controls.edgeWidth,
-      camera: { rotation: [-25, 35] },
-      style,
-      showBackfaces: controls.backfaces,
-      zoom: false,
-    })
-
-    b.addBox({ position: [0, 0, 0], size: [controls.sizeX, controls.sizeY, controls.sizeZ] })
-    b.mount(containerRef.current)
-    b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
-
-    // Apply cached icons to faces
+  const afterMount = useCallback((b: import('boxels').Boxels) => {
+    if (!iconCache) return
     for (const [face, dataUrl] of Object.entries(iconCache)) {
       b.mapImage(dataUrl, face as FaceName)
     }
+  }, [iconCache])
 
-    instanceRef.current = b
-  }, [controls, iconCache])
-
-  useEffect(() => {
-    rebuild()
-    return () => {
-      if (instanceRef.current) {
-        const rot = instanceRef.current.getRotation()
-        rotRef.current.rotX = rot.rotX
-        rotRef.current.rotY = rot.rotY
-        instanceRef.current.unmount()
-        instanceRef.current = null
-      }
-    }
-  }, [rebuild])
-
-  // Spin
-  useEffect(() => {
-    if (!controls.spinX && !controls.spinY) return
-    const b = instanceRef.current
-    if (!b) return
-    const speed = controls.spinSpeed * 0.3
-    let rafId: number
-    const tick = () => {
-      const cur = b.getRotation()
-      let rx = cur.rotX, ry = cur.rotY
-      if (controls.spinX) rx += speed * controls.spinXDir
-      if (controls.spinY) ry += speed * controls.spinYDir
-      b.updateTransform(rx, ry)
-      rotRef.current.rotX = rx
-      rotRef.current.rotY = ry
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafId)
-  }, [controls.spinX, controls.spinY, controls.spinXDir, controls.spinYDir, controls.spinSpeed])
+  useBoxelScene(containerRef, controls, afterMount)
 
   return (
     <div className="example-page">
