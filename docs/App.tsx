@@ -56,7 +56,14 @@ export function App() {
         </aside>
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<ImageExample />} />
+            <Route path="/" element={
+              <ImageExample
+                controls={controls}
+                onControlsChange={setControls}
+                explodeTrigger={explodeTrigger}
+                collapseTrigger={collapseTrigger}
+              />
+            } />
             {examples.filter(ex => ex.component).map((ex) => {
               const Comp = ex.component!
               return (
