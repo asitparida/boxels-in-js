@@ -3,9 +3,10 @@ import { Boxels, type BoxelStyle } from 'boxels'
 import { type ControlsState } from './ControlsPanel'
 import { CodeBlock } from './CodeBlock'
 
-function buildStyle(controls: ControlsState): BoxelStyle | undefined {
-  const { preset, hue, sizeX: w, sizeY: h, sizeZ: d } = controls
-  if (preset === 'none') return undefined
+export function buildStyle(controls: ControlsState): BoxelStyle | undefined {
+  const { preset, hue, opacity: opPct, sizeX: w, sizeY: h, sizeZ: d } = controls
+  const op = opPct / 100
+  if (preset === 'none') return { default: { opacity: op } }
 
   switch (preset) {
     case 'xray': {
@@ -14,11 +15,11 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
       return {
         default: (x: number, y: number, z: number) => {
           const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2)
-          const opacity = 0.1 + (dist / Math.max(maxDist, 1)) * 0.6
+          const distOp = 0.1 + (dist / Math.max(maxDist, 1)) * 0.6
           return {
             fill: `oklch(0.7 0.12 ${hue})`,
             stroke: `oklch(0.5 0.12 ${hue})`,
-            opacity,
+            opacity: distOp * op,
           }
         },
       }
@@ -26,18 +27,18 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
     case 'glass':
       return {
         default: {
-          fill: `oklch(0.8 0.06 ${hue} / 0.15)`,
-          stroke: `oklch(0.5 0.08 ${hue} / 0.4)`,
-          opacity: 0.8,
-          backdropFilter: 'blur(4px)',
+          fill: `oklch(0.8 0.06 ${hue} / ${0.15 * op})`,
+          stroke: `oklch(0.5 0.08 ${hue} / ${0.4 * op})`,
+          opacity: op,
+          backdropFilter: `blur(${Math.round(4 * op)}px)`,
         },
       }
     case 'neon':
       return {
         default: {
-          fill: 'rgba(10, 10, 15, 0.9)',
+          fill: `rgba(10, 10, 15, ${0.9 * op})`,
           stroke: `oklch(0.8 0.2 ${hue})`,
-          opacity: 1,
+          opacity: op,
         },
       }
     case 'gradient':
@@ -49,11 +50,17 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
           return {
             fill: `oklch(${lightness} ${chroma} ${h2})`,
             stroke: `oklch(${lightness - 0.1} ${chroma} ${h2})`,
+            opacity: op,
           }
         },
       }
-    default:
-      return Boxels.presets[preset as keyof typeof Boxels.presets](w, h, d)
+    default: {
+      const base = Boxels.presets[preset as keyof typeof Boxels.presets](w, h, d)
+      if (base.default && typeof base.default !== 'function') {
+        base.default = { ...base.default, opacity: op }
+      }
+      return base
+    }
   }
 }
 

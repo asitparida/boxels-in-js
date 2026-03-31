@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { Boxels, type FaceName } from 'boxels'
 import { type ControlsState } from './ControlsPanel'
-import { type ExamplePageProps } from './ExamplePage'
+import { type ExamplePageProps, buildStyle } from './ExamplePage'
 
 import landscapeUrl from '../assets/landscape.jpg'
 import iconX from '../assets/icon-x.svg'
@@ -11,7 +11,7 @@ import iconLinkedin from '../assets/icon-linkedin.svg'
 import iconYoutube from '../assets/icon-youtube.svg'
 import iconTiktok from '../assets/icon-tiktok.svg'
 
-type Mode = 'landscape' | 'icons'
+type Mode = 'across' | 'per-face'
 
 const FACE_ICONS: Partial<Record<FaceName, string>> = {
   front: iconX,
@@ -24,31 +24,10 @@ const FACE_ICONS: Partial<Record<FaceName, string>> = {
 
 type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTrigger' | 'collapseTrigger'>
 
-function buildStyle(controls: ControlsState) {
-  const { preset, hue, sizeX: w, sizeY: h, sizeZ: d } = controls
-  if (preset === 'none') return { default: { fill: '#1a1a2e', stroke: '#333' } } as import('boxels').BoxelStyle
-
-  switch (preset) {
-    case 'xray': {
-      const cx = w / 2, cy = h / 2, cz = d / 2
-      const maxDist = Math.sqrt(cx * cx + cy * cy + cz * cz)
-      return {
-        default: (x: number, y: number, z: number) => {
-          const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2)
-          const opacity = 0.1 + (dist / Math.max(maxDist, 1)) * 0.6
-          return { fill: `oklch(0.7 0.12 ${hue})`, stroke: `oklch(0.5 0.12 ${hue})`, opacity }
-        },
-      }
-    }
-    default:
-      return Boxels.presets[preset as keyof typeof Boxels.presets]?.(w, h, d)
-  }
-}
-
 export function ImageExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Boxels | null>(null)
-  const [mode, setMode] = useState<Mode>('landscape')
+  const [mode, setMode] = useState<Mode>('across')
   const rotRef = useRef({ rotX: -25, rotY: 35 })
 
   const rebuild = useCallback(() => {
@@ -77,10 +56,11 @@ export function ImageExample({ controls }: Props) {
     b.mount(containerRef.current)
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
 
-    // Apply images after mount
-    if (mode === 'landscape') {
+    if (mode === 'across') {
+      // One image sliced across all exposed faces
       b.mapImage(landscapeUrl)
     } else {
+      // Different image per face type
       for (const [face, iconUrl] of Object.entries(FACE_ICONS)) {
         b.mapImage(iconUrl, face as FaceName)
       }
@@ -134,22 +114,22 @@ export function ImageExample({ controls }: Props) {
         <div className="scene-header">
           <span className="scene-title">Image Mapping</span>
           <span className="scene-desc">
-            {mode === 'landscape'
-              ? 'Landscape distributed across all faces'
-              : 'Different icon per face'}
+            {mode === 'across'
+              ? 'One image sliced across all faces'
+              : 'Different image per face'}
           </span>
           <div className="mode-btns">
             <button
-              className={`toggle-btn ${mode === 'landscape' ? 'active' : ''}`}
-              onClick={() => setMode('landscape')}
+              className={`toggle-btn ${mode === 'across' ? 'active' : ''}`}
+              onClick={() => setMode('across')}
             >
-              Landscape
+              Across
             </button>
             <button
-              className={`toggle-btn ${mode === 'icons' ? 'active' : ''}`}
-              onClick={() => setMode('icons')}
+              className={`toggle-btn ${mode === 'per-face' ? 'active' : ''}`}
+              onClick={() => setMode('per-face')}
             >
-              Icons
+              Per Face
             </button>
           </div>
         </div>

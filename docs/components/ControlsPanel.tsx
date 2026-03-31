@@ -12,6 +12,7 @@ export interface ControlsState {
   edgeWidth: number
   preset: string
   hue: number
+  opacity: number
   backfaces: boolean
   spinX: boolean
   spinXDir: 1 | -1
@@ -72,6 +73,7 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
         <Slider label="Size" value={state.boxelSize} min={10} max={200} onChange={(v) => update({ boxelSize: v })} />
         <Slider label="Edge" value={state.edgeWidth} min={0} max={4} onChange={(v) => update({ edgeWidth: v })} />
         <Slider label="Hue" value={state.hue} min={0} max={360} onChange={(v) => update({ hue: v })} />
+        <Slider label="Opacity" value={state.opacity} min={5} max={100} onChange={(v) => update({ opacity: v })} />
         <div className="control-row">
           <span className="control-label">Backface</span>
           <button
