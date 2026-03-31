@@ -87,6 +87,15 @@ export function generateCode(controls: ControlsState, extra?: string): string {
   lines.push(`b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })`)
   lines.push(`b.mount(document.getElementById('scene'))`)
   if (controls.showAxis) lines.push(`b.showAxes()`)
+  if (controls.spinX || controls.spinY) {
+    const opts: string[] = []
+    if (controls.spinX) opts.push(`x: true`)
+    if (controls.spinY) opts.push(`y: true`)
+    if (controls.spinX && controls.spinXDir === -1) opts.push(`xDir: -1`)
+    if (controls.spinY && controls.spinYDir === -1) opts.push(`yDir: -1`)
+    if (controls.spinSpeed !== 1) opts.push(`speed: ${controls.spinSpeed}`)
+    lines.push(`b.startSpin({ ${opts.join(', ')} })`)
+  }
   if (extra) { lines.push(''); lines.push(extra) }
   return lines.join('\n')
 }

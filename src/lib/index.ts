@@ -176,6 +176,36 @@ export class Boxels {
     return { rotX: -25, rotY: 35 }
   }
 
+  // ── Auto-rotate ──
+
+  private spinRafId: number | null = null
+
+  startSpin(options: { x?: boolean; y?: boolean; xDir?: 1 | -1; yDir?: 1 | -1; speed?: number } = {}): void {
+    this.stopSpin()
+    const xOn = options.x ?? false
+    const yOn = options.y ?? true
+    const xDir = options.xDir ?? 1
+    const yDir = options.yDir ?? 1
+    const speed = (options.speed ?? 1) * 0.5
+
+    const tick = () => {
+      const cur = this.getRotation()
+      let rx = cur.rotX, ry = cur.rotY
+      if (xOn) rx += speed * xDir
+      if (yOn) ry += speed * yDir
+      this.updateTransform(rx, ry)
+      this.spinRafId = requestAnimationFrame(tick)
+    }
+    this.spinRafId = requestAnimationFrame(tick)
+  }
+
+  stopSpin(): void {
+    if (this.spinRafId !== null) {
+      cancelAnimationFrame(this.spinRafId)
+      this.spinRafId = null
+    }
+  }
+
   // ── Axes ──
 
   showAxes(): void {
