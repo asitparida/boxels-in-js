@@ -58,6 +58,29 @@ export function useBoxelScene(
     }
   }, [rebuild])
 
+  // Position preset — moves the world origin within the scene
+  useEffect(() => {
+    const b = instanceRef.current
+    if (!b) return
+    const world = b.getWorldContainer()
+    if (!world) return
+
+    const map: Record<string, { top: string; left: string }> = {
+      'top-left':      { top: '25%', left: '25%' },
+      'top-center':    { top: '25%', left: '50%' },
+      'top-right':     { top: '25%', left: '75%' },
+      'center-left':   { top: '50%', left: '25%' },
+      'center':        { top: '50%', left: '50%' },
+      'center-right':  { top: '50%', left: '75%' },
+      'bottom-left':   { top: '75%', left: '25%' },
+      'bottom-center': { top: '75%', left: '50%' },
+      'bottom-right':  { top: '75%', left: '75%' },
+    }
+    const pos = map[controls.positionPreset] ?? map['center']
+    world.style.top = pos.top
+    world.style.left = pos.left
+  }, [controls.positionPreset, rebuildCount])
+
   // Axes via library API
   useEffect(() => {
     const b = instanceRef.current

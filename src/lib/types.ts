@@ -105,6 +105,12 @@ export interface PositionOptions {
   fixed?: boolean            // true = position: fixed, false = position: absolute
 }
 
+export type PositionPreset =
+  | 'center'
+  | 'top-left' | 'top-center' | 'top-right'
+  | 'center-left' | 'center-right'
+  | 'bottom-left' | 'bottom-center' | 'bottom-right'
+
 export interface BoxelsOptions {
   renderer?: 'dom'
   container?: HTMLElement

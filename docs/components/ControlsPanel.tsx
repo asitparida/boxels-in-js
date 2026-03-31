@@ -22,6 +22,7 @@ export interface ControlsState {
   showAxis: boolean
   imageFace: 'all' | 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right'
   imageDataUrl: string | null
+  positionPreset: string
 }
 
 interface ControlsPanelProps {
@@ -188,6 +189,22 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
             </div>
           </>
         )}
+      </div>
+
+      <div className="controls-section">
+        <h4>Position</h4>
+        <div className="position-grid">
+          {['top-left', 'top-center', 'top-right',
+            'center-left', 'center', 'center-right',
+            'bottom-left', 'bottom-center', 'bottom-right'].map((pos) => (
+            <button
+              key={pos}
+              className={`position-dot ${state.positionPreset === pos ? 'active' : ''}`}
+              onClick={() => update({ positionPreset: pos })}
+              title={pos}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="controls-section">
