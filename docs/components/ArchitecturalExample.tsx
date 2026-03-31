@@ -3,20 +3,6 @@ import { ExamplePage, type ExamplePageProps } from './ExamplePage'
 import type { Boxels } from 'boxels'
 import type { ControlsState } from './ControlsPanel'
 
-const CODE = `import { Boxels } from 'boxels'
-
-const b = new Boxels({
-  boxelSize: 40,
-  gap: 0,
-  style: Boxels.presets.heerich(8, 8, 8),
-})
-
-b.addBox({ position: [0, 0, 0], size: [8, 8, 8] })
-b.addBox({ position: [1, 1, 1], size: [6, 7, 6], mode: 'subtract' })
-b.removeBox({ position: [0, 3, 2], size: [1, 3, 4] })
-
-b.mount(document.getElementById('scene'))`
-
 type Props = Omit<ExamplePageProps, 'title' | 'description' | 'code' | 'setup'>
 
 export function ArchitecturalExample(props: Props) {
@@ -36,7 +22,6 @@ export function ArchitecturalExample(props: Props) {
       {...props}
       title="Architectural"
       description="Heerich-inspired sculpture with carved interior and edge fusion."
-      code={CODE}
       setup={setup}
     />
   )

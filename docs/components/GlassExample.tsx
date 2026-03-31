@@ -3,19 +3,6 @@ import { ExamplePage, type ExamplePageProps } from './ExamplePage'
 import type { Boxels } from 'boxels'
 import type { ControlsState } from './ControlsPanel'
 
-const CODE = `import { Boxels } from 'boxels'
-
-const b = new Boxels({
-  boxelSize: 60,
-  gap: 4,
-  style: Boxels.presets.glass(4, 4, 4),
-})
-
-b.addBox({ position: [0, 0, 0], size: [4, 4, 4] })
-b.addSphere({ center: [2, 2, 2], radius: 1.5, mode: 'subtract' })
-
-b.mount(document.getElementById('scene'))`
-
 type Props = Omit<ExamplePageProps, 'title' | 'description' | 'code' | 'setup'>
 
 export function GlassExample(props: Props) {
@@ -34,8 +21,7 @@ export function GlassExample(props: Props) {
     <ExamplePage
       {...props}
       title="Glass"
-      description="Translucent boxels with backdrop-filter blur and carved sphere."
-      code={CODE}
+      description="Translucent boxels with backdrop-filter blur and a carved sphere."
       setup={setup}
     />
   )

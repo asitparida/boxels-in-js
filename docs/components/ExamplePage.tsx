@@ -131,10 +131,29 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   return group
 }
 
+function generateCode(controls: ControlsState): string {
+  const presetLine = controls.preset !== 'none'
+    ? `\n  style: Boxels.presets.${controls.preset}(${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}),`
+    : ''
+  const backfaceLine = controls.backfaces ? '\n  showBackfaces: true,' : ''
+
+  return `import { Boxels } from 'boxels'
+
+const b = new Boxels({
+  boxelSize: ${controls.boxelSize},
+  gap: ${controls.gap},
+  edgeWidth: ${controls.edgeWidth},
+  camera: { rotation: [-25, 35] },${presetLine}${backfaceLine}
+})
+
+b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })
+b.mount(document.getElementById('scene'))`
+}
+
 export interface ExamplePageProps {
   title: string
   description: string
-  code: string
+  code?: string
   controls: ControlsState
   onControlsChange: (controls: ControlsState) => void
   explodeTrigger: number
@@ -149,7 +168,6 @@ export function ExamplePage({
   const instanceRef = useRef<Boxels | null>(null)
   const lastExplode = useRef(0)
   const lastCollapse = useRef(0)
-  const [showCode, setShowCode] = useState(false)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
   const [rebuildCount, setRebuildCount] = useState(0)
 
@@ -295,26 +313,20 @@ export function ExamplePage({
     lastCollapse.current = collapseTrigger
   }, [collapseTrigger])
 
+  const dynamicCode = code ?? generateCode(controls)
+
   return (
     <div className="example-page">
       <div className="scene-area">
         <div className="scene-header">
           <span className="scene-title">{title}</span>
           <span className="scene-desc">{description}</span>
-          <button
-            className="code-toggle"
-            onClick={() => setShowCode(!showCode)}
-          >
-            {showCode ? 'Hide code' : 'Show code'}
-          </button>
         </div>
         <div ref={containerRef} className="scene-container" />
       </div>
-      {showCode && (
-        <div className="code-drawer">
-          <CodeBlock code={code} />
-        </div>
-      )}
+      <div className="code-drawer">
+        <CodeBlock code={dynamicCode} />
+      </div>
     </div>
   )
 }

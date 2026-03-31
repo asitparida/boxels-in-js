@@ -161,26 +161,6 @@ a:hover {
   padding: 4px 12px;
 }
 
-.code-toggle {
-  margin-left: auto;
-  background: rgba(20, 20, 30, 0.7);
-  backdrop-filter: blur(8px);
-  color: #888;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 1rem;
-  font-family: 'Geist Mono', monospace;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.15s;
-}
-
-.code-toggle:hover {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
 .scene-container {
   flex: 1;
   background: url('./bg.jpg') center / cover no-repeat;
