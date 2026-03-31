@@ -19,8 +19,8 @@ const controlledExamples = [
 ]
 
 const allNavItems = [
-  { path: '/', label: 'Image Across' },
-  { path: '/per-face', label: 'Per Face' },
+  { path: '/', label: 'Per Face' },
+  { path: '/image-across', label: 'Image Across' },
   { path: '/per-cell', label: 'Per Cell' },
   ...controlledExamples.map(({ path, label }) => ({ path, label })),
 ]
@@ -29,7 +29,7 @@ export function App() {
   const [controls, setControls] = useState<ControlsState>({
     sizeX: 2, sizeY: 2, sizeZ: 2,
     gap: 2, boxelSize: 60, edgeWidth: 1, texture: 'glass', hue: 220, opacity: 80, backfaces: false,
-    spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 1, showAxis: true,
+    spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 1, showAxis: false,
     imageFace: 'all', imageDataUrl: null, positionPreset: 'center', clickEnabled: false,
   })
   const [explodeTrigger, setExplodeTrigger] = useState(0)
@@ -71,8 +71,8 @@ export function App() {
         </aside>
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<ImageExample {...sharedProps} />} />
-            <Route path="/per-face" element={<ImagePerFaceExample {...sharedProps} />} />
+            <Route path="/" element={<ImagePerFaceExample {...sharedProps} />} />
+            <Route path="/image-across" element={<ImageExample {...sharedProps} />} />
             <Route path="/per-cell" element={<ImagePerBoxExample {...sharedProps} />} />
             {controlledExamples.map((ex) => {
               const Comp = ex.component
