@@ -57,47 +57,72 @@ function buildStyle(controls: ControlsState): BoxelStyle | undefined {
   }
 }
 
-function createAxisLine(axis: 'x' | 'y', length: number, color: string): HTMLDivElement {
-  const line = document.createElement('div')
-  line.className = `axis-line axis-${axis}`
-  line.style.position = 'absolute'
-  line.style.transformStyle = 'preserve-3d'
-  line.style.pointerEvents = 'none'
+function createLabel(text: string, color: string, transform: string): HTMLDivElement {
+  const label = document.createElement('div')
+  label.className = 'axis-label'
+  label.textContent = text
+  label.style.position = 'absolute'
+  label.style.color = color
+  label.style.fontSize = '16px'
+  label.style.fontFamily = "'Geist Mono', monospace"
+  label.style.fontWeight = '600'
+  label.style.transform = transform
+  label.style.pointerEvents = 'none'
+  label.style.textShadow = `0 0 12px ${color}, 0 0 4px rgba(0,0,0,0.8)`
+  label.style.whiteSpace = 'nowrap'
+  return label
+}
 
-  if (axis === 'x') {
-    // Horizontal line (left-right) — this is the axis you rotate AROUND for X spin
-    line.style.width = `${length}px`
-    line.style.height = '2px'
-    line.style.background = `linear-gradient(90deg, transparent, ${color} 20%, ${color} 80%, transparent)`
-    line.style.transform = `translate3d(${-length / 2}px, 0, 0)`
-  } else {
-    // Vertical line (up-down) — this is the axis you rotate AROUND for Y spin
-    line.style.width = '2px'
-    line.style.height = `${length}px`
-    line.style.background = `linear-gradient(180deg, transparent, ${color} 20%, ${color} 80%, transparent)`
-    line.style.transform = `translate3d(0, ${-length / 2}px, 0)`
-  }
+function createLocalAxes(halfLen: number): HTMLDivElement {
+  const group = document.createElement('div')
+  group.className = 'axis-line'
+  group.style.position = 'absolute'
+  group.style.transformStyle = 'preserve-3d'
+  group.style.pointerEvents = 'none'
 
-  // Add small sphere marker at center
+  const xColor = 'rgba(255, 100, 100, 0.5)'
+  const yColor = 'rgba(100, 180, 255, 0.5)'
+
+  // ── Left-Right axis (X) ──
+  const xLine = document.createElement('div')
+  xLine.style.position = 'absolute'
+  xLine.style.width = `${halfLen * 2}px`
+  xLine.style.height = '2px'
+  xLine.style.background = `linear-gradient(90deg, transparent, ${xColor} 15%, ${xColor} 85%, transparent)`
+  xLine.style.transform = `translate3d(${-halfLen}px, 0, 0)`
+  group.appendChild(xLine)
+
+  // L label (left, negative X)
+  group.appendChild(createLabel('L', 'rgba(255,100,100,0.7)', `translate3d(${-halfLen - 20}px, -10px, 0)`))
+  // R label (right, positive X)
+  group.appendChild(createLabel('R', 'rgba(255,100,100,0.7)', `translate3d(${halfLen + 8}px, -10px, 0)`))
+
+  // ── Top-Bottom axis (Y, goes upward in scene = negative CSS Y) ──
+  const yLine = document.createElement('div')
+  yLine.style.position = 'absolute'
+  yLine.style.width = '2px'
+  yLine.style.height = `${halfLen * 2}px`
+  yLine.style.background = `linear-gradient(180deg, transparent, ${yColor} 15%, ${yColor} 85%, transparent)`
+  yLine.style.transform = `translate3d(0, ${-halfLen}px, 0)`
+  group.appendChild(yLine)
+
+  // T label (top, negative CSS Y = positive world Y)
+  group.appendChild(createLabel('T', 'rgba(100,180,255,0.7)', `translate3d(-10px, ${-halfLen - 24}px, 0)`))
+  // B label (bottom, positive CSS Y = negative world Y)
+  group.appendChild(createLabel('B', 'rgba(100,180,255,0.7)', `translate3d(-10px, ${halfLen + 6}px, 0)`))
+
+  // Center dot
   const dot = document.createElement('div')
   dot.style.position = 'absolute'
   dot.style.width = '6px'
   dot.style.height = '6px'
   dot.style.borderRadius = '50%'
-  dot.style.background = color
-  dot.style.boxShadow = `0 0 8px ${color}`
-  if (axis === 'x') {
-    dot.style.left = '50%'
-    dot.style.top = '50%'
-    dot.style.transform = 'translate(-50%, -50%)'
-  } else {
-    dot.style.left = '50%'
-    dot.style.top = '50%'
-    dot.style.transform = 'translate(-50%, -50%)'
-  }
-  line.appendChild(dot)
+  dot.style.background = 'rgba(255,255,255,0.5)'
+  dot.style.boxShadow = '0 0 8px rgba(255,255,255,0.3)'
+  dot.style.transform = 'translate(-3px, -3px)'
+  group.appendChild(dot)
 
-  return line
+  return group
 }
 
 export interface ExamplePageProps {
@@ -185,24 +210,25 @@ export function ExamplePage({
     return () => el.removeEventListener('wheel', handleWheel)
   }, [controls, onControlsChange])
 
-  // Axis lines — independent toggle, positioned at grid center
+  // Local axes — rotate with the cube, labeled T/B/L/R
   useEffect(() => {
     const b = instanceRef.current
     if (!b) return
     const world = b.getWorldContainer()
     if (!world) return
 
-    // Remove existing axis lines
+    // Remove existing axes
     world.querySelectorAll('.axis-line').forEach((el) => el.remove())
 
     if (!controls.showAxis) return
 
-    // The group element inside worldEl is already centered at grid origin
-    // We add axis lines to worldEl at (0,0,0) which is the center
-    const axisLength = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ) * (controls.boxelSize + controls.gap) * 2
+    // Half the extent of the grid, plus some padding
+    const maxDim = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ)
+    const halfLen = maxDim * (controls.boxelSize + controls.gap) * 0.8
 
-    world.appendChild(createAxisLine('x', axisLength, 'rgba(255, 100, 100, 0.5)'))
-    world.appendChild(createAxisLine('y', axisLength, 'rgba(100, 180, 255, 0.5)'))
+    // Add to worldEl — this rotates with the scene so the labels
+    // track the cube's top/bottom/left/right orientation
+    world.appendChild(createLocalAxes(halfLen))
 
     return () => {
       world.querySelectorAll('.axis-line').forEach((el) => el.remove())
