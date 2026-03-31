@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import { ImageExample } from './components/ImageExample'
+import { ImagePerFaceExample } from './components/ImagePerFaceExample'
 import { BasicExample } from './components/BasicExample'
 import { RubikExample } from './components/RubikExample'
 import { ArchitecturalExample } from './components/ArchitecturalExample'
@@ -8,13 +9,18 @@ import { GlassExample } from './components/GlassExample'
 import { PerformanceExample } from './components/PerformanceExample'
 import { ControlsPanel, type ControlsState } from './components/ControlsPanel'
 
-const examples = [
-  { path: '/', label: 'Image Mapping', component: null },
+const controlledExamples = [
   { path: '/basic', label: 'Basic', component: BasicExample },
   { path: '/rubik', label: "Rubik's Cube", component: RubikExample },
   { path: '/architectural', label: 'Architectural', component: ArchitecturalExample },
   { path: '/glass', label: 'Glass', component: GlassExample },
   { path: '/performance', label: 'Performance', component: PerformanceExample },
+]
+
+const allNavItems = [
+  { path: '/', label: 'Image Across' },
+  { path: '/per-face', label: 'Per Face' },
+  ...controlledExamples.map(({ path, label }) => ({ path, label })),
 ]
 
 export function App() {
@@ -27,6 +33,13 @@ export function App() {
   const [explodeTrigger, setExplodeTrigger] = useState(0)
   const [collapseTrigger, setCollapseTrigger] = useState(0)
 
+  const sharedProps = {
+    controls,
+    onControlsChange: setControls,
+    explodeTrigger,
+    collapseTrigger,
+  }
+
   return (
     <HashRouter>
       <div className="app-layout">
@@ -34,14 +47,14 @@ export function App() {
           <h1>boxels</h1>
           <p className="tagline">3D design primitives</p>
           <nav>
-            {examples.map((ex) => (
+            {allNavItems.map((item) => (
               <NavLink
-                key={ex.path}
-                to={ex.path}
+                key={item.path}
+                to={item.path}
                 className={({ isActive }) => isActive ? 'active' : ''}
-                end={ex.path === '/'}
+                end={item.path === '/'}
               >
-                {ex.label}
+                {item.label}
               </NavLink>
             ))}
           </nav>
@@ -56,28 +69,15 @@ export function App() {
         </aside>
         <main className="main-content">
           <Routes>
-            <Route path="/" element={
-              <ImageExample
-                controls={controls}
-                onControlsChange={setControls}
-                explodeTrigger={explodeTrigger}
-                collapseTrigger={collapseTrigger}
-              />
-            } />
-            {examples.filter(ex => ex.component).map((ex) => {
-              const Comp = ex.component!
+            <Route path="/" element={<ImageExample {...sharedProps} />} />
+            <Route path="/per-face" element={<ImagePerFaceExample {...sharedProps} />} />
+            {controlledExamples.map((ex) => {
+              const Comp = ex.component
               return (
                 <Route
                   key={ex.path}
                   path={ex.path}
-                  element={
-                    <Comp
-                      controls={controls}
-                      onControlsChange={setControls}
-                      explodeTrigger={explodeTrigger}
-                      collapseTrigger={collapseTrigger}
-                    />
-                  }
+                  element={<Comp {...sharedProps} />}
                 />
               )
             })}

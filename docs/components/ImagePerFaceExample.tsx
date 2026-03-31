@@ -1,18 +1,57 @@
 import { useRef, useEffect, useCallback } from 'react'
-import { Boxels } from 'boxels'
+import { Boxels, type FaceName } from 'boxels'
 import { type ControlsState } from './ControlsPanel'
 import { type ExamplePageProps, buildStyle } from './ExamplePage'
 
-import landscapeUrl from '../assets/landscape.jpg'
+import iconX from '../assets/icon-x.svg'
+import iconInstagram from '../assets/icon-instagram.svg'
+import iconGithub from '../assets/icon-github.svg'
+import iconLinkedin from '../assets/icon-linkedin.svg'
+import iconYoutube from '../assets/icon-youtube.svg'
+import iconTiktok from '../assets/icon-tiktok.svg'
+
+const FACE_ICONS: Record<FaceName, { icon: string; bg: string }> = {
+  front:  { icon: iconX,         bg: '#000000' },
+  back:   { icon: iconGithub,    bg: '#24292e' },
+  left:   { icon: iconInstagram, bg: '#E4405F' },
+  right:  { icon: iconLinkedin,  bg: '#0A66C2' },
+  top:    { icon: iconYoutube,   bg: '#FF0000' },
+  bottom: { icon: iconTiktok,    bg: '#010101' },
+}
+
+// Render an SVG icon centered on a colored background into a canvas data URL
+function renderIconToDataUrl(svgUrl: string, bgColor: string, size: number): Promise<string> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')!
+    ctx.fillStyle = bgColor
+    ctx.fillRect(0, 0, size, size)
+
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const pad = size * 0.25
+      ctx.drawImage(img, pad, pad, size - pad * 2, size - pad * 2)
+      resolve(canvas.toDataURL())
+    }
+    img.onerror = () => {
+      // Fallback: just the background color
+      resolve(canvas.toDataURL())
+    }
+    img.src = svgUrl
+  })
+}
 
 type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTrigger' | 'collapseTrigger'>
 
-export function ImageExample({ controls }: Props) {
+export function ImagePerFaceExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Boxels | null>(null)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
 
-  const rebuild = useCallback(() => {
+  const rebuild = useCallback(async () => {
     if (!containerRef.current) return
 
     if (instanceRef.current) {
@@ -37,7 +76,12 @@ export function ImageExample({ controls }: Props) {
     b.addBox({ position: [0, 0, 0], size: [controls.sizeX, controls.sizeY, controls.sizeZ] })
     b.mount(containerRef.current)
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
-    b.mapImage(landscapeUrl)
+
+    // Render each icon onto a colored canvas, then map to faces
+    for (const [face, { icon, bg }] of Object.entries(FACE_ICONS)) {
+      const dataUrl = await renderIconToDataUrl(icon, bg, 256)
+      b.mapImage(dataUrl, face as FaceName)
+    }
 
     instanceRef.current = b
   }, [controls])
@@ -79,8 +123,8 @@ export function ImageExample({ controls }: Props) {
     <div className="example-page">
       <div className="scene-area">
         <div className="scene-header">
-          <span className="scene-title">Image Across</span>
-          <span className="scene-desc">One image distributed across all exposed faces</span>
+          <span className="scene-title">Per Face</span>
+          <span className="scene-desc">Different icon on each face — X, GitHub, Instagram, LinkedIn, YouTube, TikTok</span>
         </div>
         <div ref={containerRef} className="scene-container" />
       </div>
