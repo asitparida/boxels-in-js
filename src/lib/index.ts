@@ -64,6 +64,7 @@ export class Boxels {
       zoom: options.zoom ?? true,
       cameraRotation: options.camera?.rotation,
       cameraDistance: options.camera?.distance,
+      position: options.position,
     })
 
     if (options.container) {
@@ -179,6 +180,18 @@ export class Boxels {
       return { rotX: s.rotX, rotY: s.rotY }
     }
     return { rotX: -25, rotY: 35 }
+  }
+
+  // ── Positioning ──
+
+  setPosition(options: import('./types').PositionOptions): void {
+    const r = this.renderer as import('./renderers/dom/dom-renderer').DOMRenderer
+    const scene = r.getSceneElement?.()
+    if (!scene) return
+    scene.style.position = options.fixed ? 'fixed' : 'absolute'
+    if (options.x !== undefined) scene.style.left = typeof options.x === 'number' ? `${options.x}px` : options.x
+    if (options.y !== undefined) scene.style.top = typeof options.y === 'number' ? `${options.y}px` : options.y
+    if (options.zIndex !== undefined) scene.style.zIndex = String(options.zIndex)
   }
 
   // ── Auto-rotate ──

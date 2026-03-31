@@ -1,4 +1,4 @@
-import type { BoxelRenderer, RenderOptions, Vec3 } from '../../types'
+import type { BoxelRenderer, RenderOptions, Vec3, PositionOptions } from '../../types'
 import { getExposedFaces, getEdgeVisibility } from '../../core/edge-fusion'
 import { resolveStyle } from '../../core/style'
 import { createBoxelElement } from './boxel-element'
@@ -9,6 +9,7 @@ interface DOMRendererOptions {
   zoom?: boolean
   cameraRotation?: [number, number]
   cameraDistance?: number
+  position?: PositionOptions
 }
 
 export class DOMRenderer implements BoxelRenderer {
@@ -28,12 +29,24 @@ export class DOMRenderer implements BoxelRenderer {
     this.containerEl = container
 
     this.sceneEl = document.createElement('div')
-    this.sceneEl.style.width = '100%'
-    this.sceneEl.style.height = '100%'
     this.sceneEl.style.perspective = `${this.options.cameraDistance ?? 1200}px`
     this.sceneEl.style.overflow = 'hidden'
-    this.sceneEl.style.position = 'relative'
     this.sceneEl.style.transformStyle = 'preserve-3d'
+
+    const pos = this.options.position
+    if (pos) {
+      this.sceneEl.style.position = pos.fixed ? 'fixed' : 'absolute'
+      if (pos.x !== undefined) this.sceneEl.style.left = typeof pos.x === 'number' ? `${pos.x}px` : pos.x
+      if (pos.y !== undefined) this.sceneEl.style.top = typeof pos.y === 'number' ? `${pos.y}px` : pos.y
+      if (pos.zIndex !== undefined) this.sceneEl.style.zIndex = String(pos.zIndex)
+      // When positioned, the scene wraps its content rather than filling the container
+      this.sceneEl.style.width = 'auto'
+      this.sceneEl.style.height = 'auto'
+    } else {
+      this.sceneEl.style.position = 'relative'
+      this.sceneEl.style.width = '100%'
+      this.sceneEl.style.height = '100%'
+    }
 
     this.worldEl = document.createElement('div')
     this.worldEl.style.position = 'absolute'
@@ -170,6 +183,10 @@ export class DOMRenderer implements BoxelRenderer {
 
   getWorldContainer(): HTMLElement | null {
     return this.worldEl
+  }
+
+  getSceneElement(): HTMLElement | null {
+    return this.sceneEl
   }
 
   getOrbitState(): { rotX: number; rotY: number; scale: number } {

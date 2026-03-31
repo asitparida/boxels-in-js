@@ -98,6 +98,13 @@ export interface CameraOptions {
   rotation?: [number, number]
 }
 
+export interface PositionOptions {
+  x?: number | string        // CSS left value (px or %, e.g. 100 or '50%')
+  y?: number | string        // CSS top value
+  zIndex?: number
+  fixed?: boolean            // true = position: fixed, false = position: absolute
+}
+
 export interface BoxelsOptions {
   renderer?: 'dom'
   container?: HTMLElement
@@ -110,6 +117,7 @@ export interface BoxelsOptions {
   orbit?: boolean
   zoom?: boolean
   showBackfaces?: boolean
+  position?: PositionOptions
 }
 
 export interface BoxelEvent {
