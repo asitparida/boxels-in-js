@@ -12,6 +12,7 @@ import { generateBox, generateSphere, generateLine } from './core/geometry'
 import { rotateGrid } from './core/rotation'
 import { computeImageMap } from './core/image-mapper'
 import { DOMRenderer } from './renderers/dom/dom-renderer'
+import { createAxesElement } from './renderers/dom/axes'
 import { Animator } from './animation/animator'
 import { createExplodeAnimation } from './animation/explode'
 import { createLayerRotateAnimation } from './animation/layer-rotate'
@@ -173,6 +174,28 @@ export class Boxels {
       return { rotX: s.rotX, rotY: s.rotY }
     }
     return { rotX: -25, rotY: 35 }
+  }
+
+  // ── Axes ──
+
+  showAxes(): void {
+    this.hideAxes()
+    const world = this.renderer.getWorldContainer()
+    if (!world) return
+    const bounds = this.grid.getBounds()
+    const maxDim = Math.max(
+      bounds.max[0] - bounds.min[0] + 1,
+      bounds.max[1] - bounds.min[1] + 1,
+      bounds.max[2] - bounds.min[2] + 1,
+    )
+    const halfLen = maxDim * (this.options.boxelSize + this.options.gap) * 0.8
+    world.appendChild(createAxesElement(halfLen))
+  }
+
+  hideAxes(): void {
+    const world = this.renderer.getWorldContainer()
+    if (!world) return
+    world.querySelectorAll('.boxel-axes').forEach((el) => el.remove())
   }
 
   // ── Styling ──

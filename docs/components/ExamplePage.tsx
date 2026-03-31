@@ -64,90 +64,31 @@ export function buildStyle(controls: ControlsState): BoxelStyle | undefined {
   }
 }
 
-function createLabel(text: string, color: string, x: number, y: number): HTMLDivElement {
-  const label = document.createElement('div')
-  label.className = 'axis-label'
-  label.textContent = text
-  label.style.position = 'absolute'
-  label.style.color = color
-  label.style.fontSize = '16px'
-  label.style.fontFamily = "'Geist Mono', monospace"
-  label.style.fontWeight = '700'
-  // Push forward on Z so it renders in front of cube faces
-  label.style.transform = `translate3d(${x}px, ${y}px, 2px)`
-  label.style.pointerEvents = 'none'
-  label.style.textShadow = `0 0 16px ${color}, 0 2px 8px rgba(0,0,0,0.9)`
-  label.style.whiteSpace = 'nowrap'
-  return label
-}
-
-function createLocalAxes(halfLen: number): HTMLDivElement {
-  const group = document.createElement('div')
-  group.className = 'axis-line'
-  group.style.position = 'absolute'
-  group.style.transformStyle = 'preserve-3d'
-  group.style.pointerEvents = 'none'
-
-  const xColor = 'rgba(255, 100, 100, 0.6)'
-  const yColor = 'rgba(100, 180, 255, 0.6)'
-
-  // ── Left-Right axis (X) ──
-  // Push slightly forward on Z so it's always visible
-  const xLine = document.createElement('div')
-  xLine.style.position = 'absolute'
-  xLine.style.width = `${halfLen * 2}px`
-  xLine.style.height = '2px'
-  xLine.style.background = `linear-gradient(90deg, transparent, ${xColor} 10%, ${xColor} 90%, transparent)`
-  xLine.style.transform = `translate3d(${-halfLen}px, 0px, 2px)`
-  group.appendChild(xLine)
-
-  group.appendChild(createLabel('L', xColor, -halfLen - 22, -10))
-  group.appendChild(createLabel('R', xColor, halfLen + 8, -10))
-
-  // ── Top-Bottom axis (Y) ──
-  // In CSS, negative Y = up (which is "top" in world space)
-  const yLine = document.createElement('div')
-  yLine.style.position = 'absolute'
-  yLine.style.width = '2px'
-  yLine.style.height = `${halfLen * 2}px`
-  yLine.style.background = `linear-gradient(180deg, transparent, ${yColor} 10%, ${yColor} 90%, transparent)`
-  yLine.style.transform = `translate3d(0px, ${-halfLen}px, 2px)`
-  group.appendChild(yLine)
-
-  group.appendChild(createLabel('T', yColor, -10, -halfLen - 26))
-  group.appendChild(createLabel('B', yColor, -10, halfLen + 8))
-
-  // Center dot
-  const dot = document.createElement('div')
-  dot.style.position = 'absolute'
-  dot.style.width = '8px'
-  dot.style.height = '8px'
-  dot.style.borderRadius = '50%'
-  dot.style.background = 'rgba(255,255,255,0.7)'
-  dot.style.boxShadow = '0 0 12px rgba(255,255,255,0.5)'
-  dot.style.transform = 'translate3d(-4px, -4px, 2px)'
-  group.appendChild(dot)
-
-  return group
-}
-
 export function generateCode(controls: ControlsState, extra?: string): string {
   const presetLine = controls.preset !== 'none'
     ? `\n  style: Boxels.presets.${controls.preset}(${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}),`
     : ''
   const backfaceLine = controls.backfaces ? '\n  showBackfaces: true,' : ''
 
-  return `import { Boxels } from 'boxels'
-
-const b = new Boxels({
-  boxelSize: ${controls.boxelSize},
-  gap: ${controls.gap},
-  edgeWidth: ${controls.edgeWidth},
-  camera: { rotation: [-25, 35] },${presetLine}${backfaceLine}
-})
-
-b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })
-b.mount(document.getElementById('scene'))${extra ? '\n\n' + extra : ''}`
+  const lines: string[] = []
+  lines.push(`import { Boxels } from 'boxels'`)
+  lines.push('')
+  lines.push(`const b = new Boxels({`)
+  lines.push(`  boxelSize: ${controls.boxelSize},`)
+  lines.push(`  gap: ${controls.gap},`)
+  lines.push(`  edgeWidth: ${controls.edgeWidth},`)
+  lines.push(`  camera: { rotation: [-25, 35] },`)
+  if (controls.preset !== 'none') {
+    lines.push(`  style: Boxels.presets.${controls.preset}(${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}),`)
+  }
+  if (controls.backfaces) lines.push(`  showBackfaces: true,`)
+  lines.push(`})`)
+  lines.push('')
+  lines.push(`b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })`)
+  lines.push(`b.mount(document.getElementById('scene'))`)
+  if (controls.showAxis) lines.push(`b.showAxes()`)
+  if (extra) { lines.push(''); lines.push(extra) }
+  return lines.join('\n')
 }
 
 export interface ExamplePageProps {
@@ -250,29 +191,17 @@ export function ExamplePage({
   }, [controls, onControlsChange])
 
   // Local axes — rotate with the cube, labeled T/B/L/R
+  // Axes via library API
   useEffect(() => {
     const b = instanceRef.current
     if (!b) return
-    const world = b.getWorldContainer()
-    if (!world) return
-
-    // Remove existing axes
-    world.querySelectorAll('.axis-line').forEach((el) => el.remove())
-
-    if (!controls.showAxis) return
-
-    // Half the extent of the grid, plus some padding
-    const maxDim = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ)
-    const halfLen = maxDim * (controls.boxelSize + controls.gap) * 0.8
-
-    // Add to worldEl — this rotates with the scene so the labels
-    // track the cube's top/bottom/left/right orientation
-    world.appendChild(createLocalAxes(halfLen))
-
-    return () => {
-      world.querySelectorAll('.axis-line').forEach((el) => el.remove())
+    if (controls.showAxis) {
+      b.showAxes()
+    } else {
+      b.hideAxes()
     }
-  }, [controls.showAxis, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap, rebuildCount])
+    return () => b.hideAxes()
+  }, [controls.showAxis, rebuildCount])
 
   useEffect(() => {
     if (explodeTrigger > lastExplode.current) {

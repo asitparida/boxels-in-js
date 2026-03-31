@@ -3,97 +3,6 @@ import { Boxels } from 'boxels'
 import type { ControlsState } from './ControlsPanel'
 import { buildStyle } from './ExamplePage'
 
-function createLabel(text: string, color: string, x: number, y: number): HTMLDivElement {
-  const label = document.createElement('div')
-  label.className = 'axis-label'
-  label.textContent = text
-  label.style.position = 'absolute'
-  label.style.color = color
-  label.style.fontSize = '16px'
-  label.style.fontFamily = "'Geist Mono', monospace"
-  label.style.fontWeight = '700'
-  label.style.transform = `translate3d(${x}px, ${y}px, 2px)`
-  label.style.pointerEvents = 'none'
-  label.style.textShadow = `0 0 16px ${color}, 0 2px 8px rgba(0,0,0,0.9)`
-  label.style.whiteSpace = 'nowrap'
-  return label
-}
-
-function createLocalAxes(halfLen: number): HTMLDivElement {
-  const group = document.createElement('div')
-  group.className = 'axis-line'
-  group.style.position = 'absolute'
-  group.style.transformStyle = 'preserve-3d'
-  group.style.pointerEvents = 'none'
-
-  const xColor = 'rgba(255, 100, 100, 0.9)'
-  const yColor = 'rgba(100, 180, 255, 0.9)'
-  const zColor = 'rgba(100, 255, 160, 0.9)'
-
-  // X axis — Left / Right
-  const xLine = document.createElement('div')
-  xLine.style.position = 'absolute'
-  xLine.style.width = `${halfLen * 2}px`
-  xLine.style.height = '4px'
-  xLine.style.background = `linear-gradient(90deg, transparent, ${xColor} 10%, ${xColor} 90%, transparent)`
-  xLine.style.transform = `translate3d(${-halfLen}px, 0px, 2px)`
-  group.appendChild(xLine)
-  group.appendChild(createLabel('L', xColor, -halfLen - 22, -10))
-  group.appendChild(createLabel('R', xColor, halfLen + 8, -10))
-
-  // Y axis — Top / Bottom
-  const yLine = document.createElement('div')
-  yLine.style.position = 'absolute'
-  yLine.style.width = '4px'
-  yLine.style.height = `${halfLen * 2}px`
-  yLine.style.background = `linear-gradient(180deg, transparent, ${yColor} 10%, ${yColor} 90%, transparent)`
-  yLine.style.transform = `translate3d(0px, ${-halfLen}px, 2px)`
-  group.appendChild(yLine)
-  group.appendChild(createLabel('T', yColor, -10, -halfLen - 26))
-  group.appendChild(createLabel('B', yColor, -10, halfLen + 8))
-
-  // Z axis — Front / Back
-  // Build from small segments along Z so it's visible from any camera angle
-  const zSegments = 20
-  const segLen = (halfLen * 2) / zSegments
-  for (let i = 0; i < zSegments; i++) {
-    const t = i / zSegments
-    // Fade at ends
-    if (t < 0.1 || t > 0.9) continue
-    const seg = document.createElement('div')
-    seg.style.position = 'absolute'
-    seg.style.width = '4px'
-    seg.style.height = '4px'
-    seg.style.borderRadius = '50%'
-    seg.style.background = zColor
-    const z = -halfLen + i * segLen
-    seg.style.transform = `translate3d(-2px, -2px, ${z}px)`
-    group.appendChild(seg)
-  }
-
-  // F label (front = +Z direction)
-  const fLabel = createLabel('F', zColor, 0, 0)
-  fLabel.style.transform = `translate3d(-8px, -10px, ${halfLen + 12}px)`
-  group.appendChild(fLabel)
-
-  // Bk label (back = -Z direction)
-  const bkLabel = createLabel('Bk', zColor, 0, 0)
-  bkLabel.style.transform = `translate3d(-12px, -10px, ${-halfLen - 28}px)`
-  group.appendChild(bkLabel)
-
-  const dot = document.createElement('div')
-  dot.style.position = 'absolute'
-  dot.style.width = '10px'
-  dot.style.height = '10px'
-  dot.style.borderRadius = '50%'
-  dot.style.background = 'rgba(255,255,255,0.7)'
-  dot.style.boxShadow = '0 0 12px rgba(255,255,255,0.5)'
-  dot.style.transform = 'translate3d(-4px, -4px, 2px)'
-  group.appendChild(dot)
-
-  return group
-}
-
 export function useBoxelScene(
   containerRef: React.RefObject<HTMLDivElement | null>,
   controls: ControlsState,
@@ -149,24 +58,17 @@ export function useBoxelScene(
     }
   }, [rebuild])
 
-  // Axis lines
+  // Axes via library API
   useEffect(() => {
     const b = instanceRef.current
     if (!b) return
-    const world = b.getWorldContainer()
-    if (!world) return
-
-    world.querySelectorAll('.axis-line').forEach((el) => el.remove())
-    if (!controls.showAxis) return
-
-    const maxDim = Math.max(controls.sizeX, controls.sizeY, controls.sizeZ)
-    const halfLen = maxDim * (controls.boxelSize + controls.gap) * 0.8
-    world.appendChild(createLocalAxes(halfLen))
-
-    return () => {
-      world.querySelectorAll('.axis-line').forEach((el) => el.remove())
+    if (controls.showAxis) {
+      b.showAxes()
+    } else {
+      b.hideAxes()
     }
-  }, [controls.showAxis, controls.sizeX, controls.sizeY, controls.sizeZ, controls.boxelSize, controls.gap, rebuildCount])
+    return () => b.hideAxes()
+  }, [controls.showAxis, rebuildCount])
 
   // Spin
   useEffect(() => {
@@ -188,17 +90,6 @@ export function useBoxelScene(
     rafId = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafId)
   }, [controls.spinX, controls.spinY, controls.spinXDir, controls.spinYDir, controls.spinSpeed])
-
-  // Wheel → boxelSize
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault()
-    }
-    el.addEventListener('wheel', handleWheel, { passive: false })
-    return () => el.removeEventListener('wheel', handleWheel)
-  }, [containerRef])
 
   return { instanceRef, rebuildCount }
 }
