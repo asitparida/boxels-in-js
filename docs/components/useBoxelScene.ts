@@ -163,7 +163,7 @@ export function useBoxelScene(
     if (!controls.spinX && !controls.spinY) return
     const b = instanceRef.current
     if (!b) return
-    const speed = controls.spinSpeed * 0.3
+    const speed = controls.spinSpeed * 0.5
     let rafId: number
     const tick = () => {
       const cur = b.getRotation()
