@@ -1,7 +1,14 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { Boxels } from 'boxels'
+import { Boxels, type TextureName } from 'boxels'
 import type { ControlsState } from './ControlsPanel'
-import { buildStyle } from './ExamplePage'
+
+const positionMap: Record<string, { top: string; left: string }> = {
+  'top-center':    { top: '25%', left: '50%' },
+  'center-left':   { top: '50%', left: '25%' },
+  'center':        { top: '50%', left: '50%' },
+  'center-right':  { top: '50%', left: '75%' },
+  'bottom-center': { top: '75%', left: '50%' },
+}
 
 export function useBoxelScene(
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -19,26 +26,62 @@ export function useBoxelScene(
       const rot = instanceRef.current.getRotation()
       rotRef.current.rotX = rot.rotX
       rotRef.current.rotY = rot.rotY
+      instanceRef.current.stopSpin()
       instanceRef.current.unmount()
     }
 
-    const style = buildStyle(controls)
-
+    // Construct with structural options only
     const b = new Boxels({
       boxelSize: controls.boxelSize,
       gap: controls.gap,
       edgeWidth: controls.edgeWidth,
       camera: { rotation: [-25, 35] },
-      style,
       showBackfaces: controls.backfaces,
       zoom: false,
     })
 
+    // Geometry
     b.addBox({ position: [0, 0, 0], size: [controls.sizeX, controls.sizeY, controls.sizeZ] })
+
+    // Mount
     b.mount(containerRef.current)
+
+    // Texture via API
+    b.setTexture(controls.texture as TextureName, controls.hue, controls.opacity / 100)
+
+    // Restore rotation
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
 
+    // Position
+    const pos = positionMap[controls.positionPreset] ?? positionMap['center']
+    const world = b.getWorldContainer()
+    if (world) {
+      world.style.top = pos.top
+      world.style.left = pos.left
+    }
+
+    // Custom post-mount (image mapping etc)
     if (afterMount) afterMount(b)
+
+    // Image from controls
+    if (controls.imageDataUrl) {
+      const targetFace = controls.imageFace === 'all' ? undefined : controls.imageFace
+      b.mapImage(controls.imageDataUrl, targetFace as import('boxels').FaceName | undefined)
+    }
+
+    // Axes via API
+    if (controls.showAxis) b.showAxes()
+
+    // Spin via API
+    if (controls.spinX || controls.spinY) {
+      b.startSpin({
+        x: controls.spinX,
+        y: controls.spinY,
+        xDir: controls.spinXDir,
+        yDir: controls.spinYDir,
+        speed: controls.spinSpeed,
+      })
+    }
 
     instanceRef.current = b
     setRebuildCount((n) => n + 1)
@@ -52,67 +95,12 @@ export function useBoxelScene(
         const rot = instanceRef.current.getRotation()
         rotRef.current.rotX = rot.rotX
         rotRef.current.rotY = rot.rotY
+        instanceRef.current.stopSpin()
         instanceRef.current.unmount()
         instanceRef.current = null
       }
     }
   }, [rebuild])
-
-  // Position preset — moves the world origin within the scene
-  useEffect(() => {
-    const b = instanceRef.current
-    if (!b) return
-    const world = b.getWorldContainer()
-    if (!world) return
-
-    const map: Record<string, { top: string; left: string }> = {
-      'top-left':      { top: '25%', left: '25%' },
-      'top-center':    { top: '25%', left: '50%' },
-      'top-right':     { top: '25%', left: '75%' },
-      'center-left':   { top: '50%', left: '25%' },
-      'center':        { top: '50%', left: '50%' },
-      'center-right':  { top: '50%', left: '75%' },
-      'bottom-left':   { top: '75%', left: '25%' },
-      'bottom-center': { top: '75%', left: '50%' },
-      'bottom-right':  { top: '75%', left: '75%' },
-    }
-    const pos = map[controls.positionPreset] ?? map['center']
-    world.style.top = pos.top
-    world.style.left = pos.left
-  }, [controls.positionPreset, rebuildCount])
-
-  // Axes via library API
-  useEffect(() => {
-    const b = instanceRef.current
-    if (!b) return
-    if (controls.showAxis) {
-      b.showAxes()
-    } else {
-      b.hideAxes()
-    }
-    return () => b.hideAxes()
-  }, [controls.showAxis, rebuildCount])
-
-  // Spin
-  useEffect(() => {
-    if (!controls.spinX && !controls.spinY) return
-    const b = instanceRef.current
-    if (!b) return
-    const speed = controls.spinSpeed * 0.5
-    let rafId: number
-    const tick = () => {
-      const cur = b.getRotation()
-      let rx = cur.rotX, ry = cur.rotY
-      if (controls.spinX) rx += speed * controls.spinXDir
-      if (controls.spinY) ry += speed * controls.spinYDir
-      b.updateTransform(rx, ry)
-      rotRef.current.rotX = rx
-      rotRef.current.rotY = ry
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafId)
-  }, [controls.spinX, controls.spinY, controls.spinXDir, controls.spinYDir, controls.spinSpeed])
 
   return { instanceRef, rebuildCount }
 }

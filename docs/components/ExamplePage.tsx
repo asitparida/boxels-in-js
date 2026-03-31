@@ -23,8 +23,23 @@ export function generateCode(controls: ControlsState, extra?: string): string {
   lines.push('')
   lines.push(`b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })`)
   lines.push(`b.mount(document.getElementById('scene'))`)
+  // Texture
   lines.push(`b.setTexture('${controls.texture}', ${controls.hue}, ${(controls.opacity / 100).toFixed(2)})`)
+  // Position
+  if (controls.positionPreset !== 'center') {
+    lines.push(`b.setPosition({ x: '${positionMap[controls.positionPreset]?.left ?? '50%'}', y: '${positionMap[controls.positionPreset]?.top ?? '50%'}' })`)
+  }
+  // Image
+  if (controls.imageDataUrl) {
+    if (controls.imageFace === 'all') {
+      lines.push(`b.mapImage('image.jpg')`)
+    } else {
+      lines.push(`b.mapImage('image.jpg', '${controls.imageFace}')`)
+    }
+  }
+  // Axes
   if (controls.showAxis) lines.push(`b.showAxes()`)
+  // Spin
   if (controls.spinX || controls.spinY) {
     const opts: string[] = []
     if (controls.spinX) opts.push(`x: true`)
@@ -36,6 +51,14 @@ export function generateCode(controls: ControlsState, extra?: string): string {
   }
   if (extra) { lines.push(''); lines.push(extra) }
   return lines.join('\n')
+}
+
+const positionMap: Record<string, { top: string; left: string }> = {
+  'top-center':    { top: '25%', left: '50%' },
+  'center-left':   { top: '50%', left: '25%' },
+  'center':        { top: '50%', left: '50%' },
+  'center-right':  { top: '50%', left: '75%' },
+  'bottom-center': { top: '75%', left: '50%' },
 }
 
 export interface ExamplePageProps {
@@ -63,35 +86,70 @@ export function ExamplePage({
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
 
-    // Save current rotation before destroying
     if (instanceRef.current) {
       const rot = instanceRef.current.getRotation()
       rotRef.current.rotX = rot.rotX
       rotRef.current.rotY = rot.rotY
+      instanceRef.current.stopSpin()
       instanceRef.current.unmount()
     }
 
-    const style = buildStyle(controls)
-
+    // Construct with only structural options — no style
     const b = new Boxels({
       boxelSize: controls.boxelSize,
       gap: controls.gap,
       edgeWidth: controls.edgeWidth,
       camera: { rotation: [-25, 35] },
-      style: setup ? undefined : style,
       showBackfaces: controls.backfaces,
       zoom: false,
     })
 
+    // Geometry
     if (setup) {
       setup(b, controls)
     } else {
       b.addBox({ position: [0, 0, 0], size: [controls.sizeX, controls.sizeY, controls.sizeZ] })
     }
 
+    // Mount
     b.mount(containerRef.current)
+
+    // Texture via API (unless setup handles its own style)
+    if (!setup) {
+      b.setTexture(controls.texture as TextureName, controls.hue, controls.opacity / 100)
+    }
+
     // Restore rotation
     b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
+
+    // Position via API
+    const pos = positionMap[controls.positionPreset] ?? positionMap['center']
+    const world = b.getWorldContainer()
+    if (world) {
+      world.style.top = pos.top
+      world.style.left = pos.left
+    }
+
+    // Image via API
+    if (controls.imageDataUrl) {
+      const targetFace = controls.imageFace === 'all' ? undefined : controls.imageFace
+      b.mapImage(controls.imageDataUrl, targetFace as import('boxels').FaceName | undefined)
+    }
+
+    // Axes via API
+    if (controls.showAxis) b.showAxes()
+
+    // Spin via API
+    if (controls.spinX || controls.spinY) {
+      b.startSpin({
+        x: controls.spinX,
+        y: controls.spinY,
+        xDir: controls.spinXDir,
+        yDir: controls.spinYDir,
+        speed: controls.spinSpeed,
+      })
+    }
+
     instanceRef.current = b
     setRebuildCount((n) => n + 1)
   }, [controls, setup])
@@ -103,39 +161,12 @@ export function ExamplePage({
         const rot = instanceRef.current.getRotation()
         rotRef.current.rotX = rot.rotX
         rotRef.current.rotY = rot.rotY
+        instanceRef.current.stopSpin()
         instanceRef.current.unmount()
         instanceRef.current = null
       }
     }
   }, [rebuild])
-
-  // Position preset
-  useEffect(() => {
-    const b = instanceRef.current
-    if (!b) return
-    const world = b.getWorldContainer()
-    if (!world) return
-    const map: Record<string, { top: string; left: string }> = {
-      'top-left': { top: '25%', left: '25%' }, 'top-center': { top: '25%', left: '50%' }, 'top-right': { top: '25%', left: '75%' },
-      'center-left': { top: '50%', left: '25%' }, 'center': { top: '50%', left: '50%' }, 'center-right': { top: '50%', left: '75%' },
-      'bottom-left': { top: '75%', left: '25%' }, 'bottom-center': { top: '75%', left: '50%' }, 'bottom-right': { top: '75%', left: '75%' },
-    }
-    const pos = map[controls.positionPreset] ?? map['center']
-    world.style.top = pos.top
-    world.style.left = pos.left
-  }, [controls.positionPreset, rebuildCount])
-
-  // Apply image to faces via library API
-  useEffect(() => {
-    const b = instanceRef.current
-    if (!b) return
-    if (!controls.imageDataUrl) {
-      b.clearImage()
-      return
-    }
-    const targetFace = controls.imageFace === 'all' ? undefined : controls.imageFace
-    b.mapImage(controls.imageDataUrl, targetFace as import('boxels').FaceName | undefined)
-  }, [controls.imageDataUrl, controls.imageFace, rebuildCount])
 
   // Mouse wheel controls boxel size
   useEffect(() => {
@@ -153,51 +184,12 @@ export function ExamplePage({
     return () => el.removeEventListener('wheel', handleWheel)
   }, [controls, onControlsChange])
 
-  // Local axes — rotate with the cube, labeled T/B/L/R
-  // Axes via library API
-  useEffect(() => {
-    const b = instanceRef.current
-    if (!b) return
-    if (controls.showAxis) {
-      b.showAxes()
-    } else {
-      b.hideAxes()
-    }
-    return () => b.hideAxes()
-  }, [controls.showAxis, rebuildCount])
-
   useEffect(() => {
     if (explodeTrigger > lastExplode.current) {
       instanceRef.current?.animateGap({ from: controls.gap, to: 10, duration: 800 })
     }
     lastExplode.current = explodeTrigger
   }, [explodeTrigger])
-
-  // Auto-rotate — reads current rotation each frame so orbit drag composes with spin
-  useEffect(() => {
-    if (!controls.spinX && !controls.spinY) return
-    const b = instanceRef.current
-    if (!b) return
-
-    const speed = controls.spinSpeed * 0.3
-    let rafId: number
-
-    const tick = () => {
-      // Read the latest angles (includes any orbit drag changes since last frame)
-      const current = b.getRotation()
-      let rx = current.rotX
-      let ry = current.rotY
-      if (controls.spinX) rx += speed * controls.spinXDir
-      if (controls.spinY) ry += speed * controls.spinYDir
-      b.updateTransform(rx, ry)
-      rotRef.current.rotX = rx
-      rotRef.current.rotY = ry
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-
-    return () => cancelAnimationFrame(rafId)
-  }, [controls.spinX, controls.spinY, controls.spinXDir, controls.spinYDir, controls.spinSpeed])
 
   useEffect(() => {
     if (collapseTrigger > lastCollapse.current) {
