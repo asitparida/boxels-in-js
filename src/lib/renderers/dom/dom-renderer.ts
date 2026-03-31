@@ -89,18 +89,18 @@ export class DOMRenderer implements BoxelRenderer {
     const { grid, boxelSize, gap, edgeWidth, edgeColor, globalStyle, showBackfaces } = options
 
     // Center the grid so rotation orbits around the true visual center.
-    // Each boxel container is positioned at CSS: (x*offset, -y*offset, z*offset)
-    // and has size boxelSize, so its visual center is at:
-    //   CSS X: x*offset + boxelSize/2
-    //   CSS Y: -y*offset + boxelSize/2  (Y is flipped)
-    //   CSS Z: z*offset + boxelSize/2
-    // The group offset negates the midpoint of the bounding box of all visual centers.
+    // Each boxel container is at CSS: (x*offset, -y*offset, z*offset)
+    // Container is a boxelSize x boxelSize div (has width/height but no depth).
+    // Faces create depth symmetrically (front +half, back -half in Z).
+    //   X center: x*offset + half  (half the div width)
+    //   Y center: -y*offset + half (half the div height)
+    //   Z center: z*offset         (faces symmetric, no offset needed)
     const bounds = grid.getBounds()
     const offset = boxelSize + gap
     const half = boxelSize / 2
-    const centerCssX = (bounds.min[0] * offset + half + bounds.max[0] * offset + half) / 2
-    const centerCssY = (-bounds.max[1] * offset + half + -bounds.min[1] * offset + half) / 2
-    const centerCssZ = (bounds.min[2] * offset + half + bounds.max[2] * offset + half) / 2
+    const centerCssX = (bounds.min[0] + bounds.max[0]) / 2 * offset + half
+    const centerCssY = -(bounds.min[1] + bounds.max[1]) / 2 * offset + half
+    const centerCssZ = (bounds.min[2] + bounds.max[2]) / 2 * offset
 
     const groupEl = document.createElement('div')
     groupEl.style.position = 'absolute'
