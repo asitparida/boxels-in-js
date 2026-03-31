@@ -77,6 +77,7 @@ export function ExamplePage({
   const lastExplode = useRef(0)
   const lastCollapse = useRef(0)
   const [showCode, setShowCode] = useState(false)
+  const rotRef = useRef({ rotX: -25, rotY: 35 })
 
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
@@ -103,6 +104,8 @@ export function ExamplePage({
     }
 
     b.mount(containerRef.current)
+    // Restore last known rotation so rebuilds don't reset the view
+    b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
     instanceRef.current = b
   }, [controls, setup])
 
@@ -123,22 +126,24 @@ export function ExamplePage({
     lastExplode.current = explodeTrigger
   }, [explodeTrigger])
 
-  // Auto-rotate — starts from current orbit position, supports both axes with direction
+  // Auto-rotate — continues from last known rotation
   useEffect(() => {
     if (!controls.spinX && !controls.spinY) return
     const b = instanceRef.current
     if (!b) return
 
+    // Read the latest rotation from the renderer (includes orbit drag changes)
     const current = b.getRotation()
-    let rotX = current.rotX
-    let rotY = current.rotY
+    rotRef.current.rotX = current.rotX
+    rotRef.current.rotY = current.rotY
+
     const speed = controls.spinSpeed * 0.3
     let rafId: number
 
     const tick = () => {
-      if (controls.spinX) rotX += speed * controls.spinXDir
-      if (controls.spinY) rotY += speed * controls.spinYDir
-      b.updateTransform(rotX, rotY)
+      if (controls.spinX) rotRef.current.rotX += speed * controls.spinXDir
+      if (controls.spinY) rotRef.current.rotY += speed * controls.spinYDir
+      b.updateTransform(rotRef.current.rotX, rotRef.current.rotY)
       rafId = requestAnimationFrame(tick)
     }
     rafId = requestAnimationFrame(tick)

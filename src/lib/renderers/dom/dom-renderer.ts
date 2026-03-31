@@ -17,6 +17,8 @@ export class DOMRenderer implements BoxelRenderer {
   private containerEl: HTMLElement | null = null
   private orbitControls: OrbitControls | null = null
   private options: DOMRendererOptions
+  private currentRotX: number = -25
+  private currentRotY: number = 35
 
   constructor(options: DOMRendererOptions = {}) {
     this.options = options
@@ -40,6 +42,8 @@ export class DOMRenderer implements BoxelRenderer {
     this.worldEl.style.transformStyle = 'preserve-3d'
 
     const [rx, ry] = this.options.cameraRotation ?? [-25, 35]
+    this.currentRotX = rx
+    this.currentRotY = ry
     this.worldEl.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`
 
     this.sceneEl.appendChild(this.worldEl)
@@ -49,6 +53,8 @@ export class DOMRenderer implements BoxelRenderer {
       this.orbitControls = new OrbitControls(
         this.options.cameraRotation ?? [-25, 35],
         (state) => {
+          this.currentRotX = state.rotX
+          this.currentRotY = state.rotY
           if (this.worldEl) {
             this.worldEl.style.transform = `rotateX(${state.rotX}deg) rotateY(${state.rotY}deg) scale(${state.scale})`
           }
@@ -114,6 +120,8 @@ export class DOMRenderer implements BoxelRenderer {
   }
 
   updateTransform(rotX: number, rotY: number): void {
+    this.currentRotX = rotX
+    this.currentRotY = rotY
     if (this.worldEl) {
       this.worldEl.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`
     }
@@ -151,9 +159,7 @@ export class DOMRenderer implements BoxelRenderer {
   }
 
   getOrbitState(): { rotX: number; rotY: number; scale: number } {
-    if (this.orbitControls) return this.orbitControls.getState()
-    const [rx, ry] = this.options.cameraRotation ?? [-25, 35]
-    return { rotX: rx, rotY: ry, scale: 1 }
+    return { rotX: this.currentRotX, rotY: this.currentRotY, scale: 1 }
   }
 
   dispose(): void {
