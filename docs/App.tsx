@@ -30,7 +30,7 @@ export function App() {
     sizeX: 2, sizeY: 2, sizeZ: 2,
     gap: 2, boxelSize: 60, edgeWidth: 1, texture: 'glass', hue: 220, opacity: 80, backfaces: false,
     spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 1, showAxis: true,
-    imageFace: 'all', imageDataUrl: null, positionPreset: 'center',
+    imageFace: 'all', imageDataUrl: null, positionPreset: 'center', clickEnabled: false,
   })
   const [explodeTrigger, setExplodeTrigger] = useState(0)
   const [collapseTrigger, setCollapseTrigger] = useState(0)

@@ -23,6 +23,7 @@ export interface ControlsState {
   imageFace: 'all' | 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right'
   imageDataUrl: string | null
   positionPreset: string
+  clickEnabled: boolean
 }
 
 interface ControlsPanelProps {
@@ -206,6 +207,19 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
               />
             ) : <div key={i} />
           ))}
+        </div>
+      </div>
+
+      <div className="controls-section">
+        <h4>Interact</h4>
+        <div className="control-row">
+          <span className="control-label">Click</span>
+          <button
+            className={`toggle-btn ${state.clickEnabled ? 'active' : ''}`}
+            onClick={() => update({ clickEnabled: !state.clickEnabled })}
+          >
+            {state.clickEnabled ? 'ON' : 'OFF'}
+          </button>
         </div>
       </div>
 

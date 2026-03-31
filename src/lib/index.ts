@@ -338,6 +338,68 @@ export class Boxels {
     )
   }
 
+  // ── Click interaction ──
+
+  private clickEnabled = false
+  private clickHandler: ((info: { boxel: Vec3; face: string }) => void) | null = null
+  private boundClickListener: ((e: Event) => void) | null = null
+
+  enableClick(handler: (info: { boxel: Vec3; face: string }) => void): void {
+    this.disableClick()
+    this.clickEnabled = true
+    this.clickHandler = handler
+
+    // Stop spin when click is enabled
+    this.stopSpin()
+
+    const world = this.renderer.getWorldContainer()
+    if (!world) return
+
+    world.style.cursor = 'pointer'
+
+    this.boundClickListener = (e: Event) => {
+      const target = e.target as HTMLElement
+      const faceEl = target.closest('[data-face]') as HTMLElement | null
+      if (!faceEl) return
+      const boxelEl = faceEl.closest('[data-boxel]') as HTMLElement | null
+      if (!boxelEl) return
+
+      const pos = boxelEl.dataset.boxel!.split(',').map(Number) as Vec3
+      const face = faceEl.dataset.face!
+
+      // Dip animation: scale down then back
+      const origTransform = boxelEl.style.transform
+      boxelEl.style.transition = 'transform 0.15s ease-in'
+      boxelEl.style.transform = origTransform + ' scale(0.85)'
+
+      setTimeout(() => {
+        boxelEl.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        boxelEl.style.transform = origTransform
+        setTimeout(() => {
+          boxelEl.style.transition = ''
+        }, 250)
+      }, 150)
+
+      this.clickHandler?.({ boxel: pos, face })
+    }
+
+    world.addEventListener('click', this.boundClickListener)
+  }
+
+  disableClick(): void {
+    if (!this.clickEnabled) return
+    const world = this.renderer.getWorldContainer()
+    if (world) {
+      world.style.cursor = ''
+      if (this.boundClickListener) {
+        world.removeEventListener('click', this.boundClickListener)
+      }
+    }
+    this.clickEnabled = false
+    this.clickHandler = null
+    this.boundClickListener = null
+  }
+
   // ── Events ──
 
   on(event: BoxelEventType, callback: EventCallback): void {

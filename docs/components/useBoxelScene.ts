@@ -72,14 +72,21 @@ export function useBoxelScene(
     // Axes via API
     if (controls.showAxis) b.showAxes()
 
-    // Spin via API
-    if (controls.spinX || controls.spinY) {
+    // Spin via API (only if click is not enabled)
+    if ((controls.spinX || controls.spinY) && !controls.clickEnabled) {
       b.startSpin({
         x: controls.spinX,
         y: controls.spinY,
         xDir: controls.spinXDir,
         yDir: controls.spinYDir,
         speed: controls.spinSpeed,
+      })
+    }
+
+    // Click via API
+    if (controls.clickEnabled) {
+      b.enableClick(({ boxel, face }) => {
+        console.log(`Clicked ${face} face at [${boxel.join(', ')}]`)
       })
     }
 

@@ -49,6 +49,12 @@ export function generateCode(controls: ControlsState, extra?: string): string {
     if (controls.spinSpeed !== 1) opts.push(`speed: ${controls.spinSpeed}`)
     lines.push(`b.startSpin({ ${opts.join(', ')} })`)
   }
+  // Click
+  if (controls.clickEnabled) {
+    lines.push(`b.enableClick(({ boxel, face }) => {`)
+    lines.push(`  console.log(\`Clicked \${face} face at [\${boxel}]\`)`)
+    lines.push(`})`)
+  }
   if (extra) { lines.push(''); lines.push(extra) }
   return lines.join('\n')
 }
@@ -82,6 +88,8 @@ export function ExamplePage({
   const rotRef = useRef({ rotX: -25, rotY: 35 })
   const [showCode, setShowCode] = useState(true)
   const [rebuildCount, setRebuildCount] = useState(0)
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>()
 
   const rebuild = useCallback(() => {
     if (!containerRef.current) return
@@ -139,14 +147,24 @@ export function ExamplePage({
     // Axes via API
     if (controls.showAxis) b.showAxes()
 
-    // Spin via API
-    if (controls.spinX || controls.spinY) {
+    // Spin via API (only if click is not enabled)
+    if ((controls.spinX || controls.spinY) && !controls.clickEnabled) {
       b.startSpin({
         x: controls.spinX,
         y: controls.spinY,
         xDir: controls.spinXDir,
         yDir: controls.spinYDir,
         speed: controls.spinSpeed,
+      })
+    }
+
+    // Click via API
+    if (controls.clickEnabled) {
+      b.enableClick(({ boxel, face }) => {
+        const msg = `Clicked ${face} face at [${boxel.join(', ')}]`
+        setToast(msg)
+        clearTimeout(toastTimer.current)
+        toastTimer.current = setTimeout(() => setToast(null), 3000)
       })
     }
 
@@ -216,6 +234,12 @@ export function ExamplePage({
         <div ref={containerRef} className="scene-container" />
       </div>
       <CodeDrawer code={dynamicCode} visible={showCode} />
+      {toast && (
+        <div className="boxel-toast">
+          <span>{toast}</span>
+          <button onClick={() => setToast(null)}>&times;</button>
+        </div>
+      )}
     </div>
   )
 }

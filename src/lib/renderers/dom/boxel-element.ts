@@ -21,6 +21,7 @@ export function createFaceElement(
 ): HTMLDivElement {
   const el = document.createElement('div')
   el.dataset.face = face
+  el.dataset.faceIndex = face
   el.style.position = 'absolute'
   el.style.width = `${boxelSize}px`
   el.style.height = `${boxelSize}px`
@@ -62,6 +63,9 @@ export function createBoxelElement(
 ): HTMLDivElement {
   const container = document.createElement('div')
   container.dataset.boxel = `${position[0]},${position[1]},${position[2]}`
+  container.dataset.x = String(position[0])
+  container.dataset.y = String(position[1])
+  container.dataset.z = String(position[2])
   container.style.position = 'absolute'
   container.style.width = `${boxelSize}px`
   container.style.height = `${boxelSize}px`
