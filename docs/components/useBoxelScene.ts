@@ -26,15 +26,15 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   group.style.transformStyle = 'preserve-3d'
   group.style.pointerEvents = 'none'
 
-  const xColor = 'rgba(255, 100, 100, 0.6)'
-  const yColor = 'rgba(100, 180, 255, 0.6)'
-  const zColor = 'rgba(100, 255, 160, 0.6)'
+  const xColor = 'rgba(255, 100, 100, 0.9)'
+  const yColor = 'rgba(100, 180, 255, 0.9)'
+  const zColor = 'rgba(100, 255, 160, 0.9)'
 
   // X axis — Left / Right
   const xLine = document.createElement('div')
   xLine.style.position = 'absolute'
   xLine.style.width = `${halfLen * 2}px`
-  xLine.style.height = '2px'
+  xLine.style.height = '4px'
   xLine.style.background = `linear-gradient(90deg, transparent, ${xColor} 10%, ${xColor} 90%, transparent)`
   xLine.style.transform = `translate3d(${-halfLen}px, 0px, 2px)`
   group.appendChild(xLine)
@@ -44,7 +44,7 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   // Y axis — Top / Bottom
   const yLine = document.createElement('div')
   yLine.style.position = 'absolute'
-  yLine.style.width = '2px'
+  yLine.style.width = '4px'
   yLine.style.height = `${halfLen * 2}px`
   yLine.style.background = `linear-gradient(180deg, transparent, ${yColor} 10%, ${yColor} 90%, transparent)`
   yLine.style.transform = `translate3d(0px, ${-halfLen}px, 2px)`
@@ -52,29 +52,39 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   group.appendChild(createLabel('T', yColor, -10, -halfLen - 26))
   group.appendChild(createLabel('B', yColor, -10, halfLen + 8))
 
-  // Z axis — Front / Back (rotated into the Z plane)
-  const zLine = document.createElement('div')
-  zLine.style.position = 'absolute'
-  zLine.style.width = `${halfLen * 2}px`
-  zLine.style.height = '2px'
-  zLine.style.background = `linear-gradient(90deg, transparent, ${zColor} 10%, ${zColor} 90%, transparent)`
-  zLine.style.transform = `rotateY(90deg) translate3d(${-halfLen}px, 0px, 0px)`
-  group.appendChild(zLine)
+  // Z axis — Front / Back
+  // Build from small segments along Z so it's visible from any camera angle
+  const zSegments = 20
+  const segLen = (halfLen * 2) / zSegments
+  for (let i = 0; i < zSegments; i++) {
+    const t = i / zSegments
+    // Fade at ends
+    if (t < 0.1 || t > 0.9) continue
+    const seg = document.createElement('div')
+    seg.style.position = 'absolute'
+    seg.style.width = '4px'
+    seg.style.height = '4px'
+    seg.style.borderRadius = '50%'
+    seg.style.background = zColor
+    const z = -halfLen + i * segLen
+    seg.style.transform = `translate3d(-2px, -2px, ${z}px)`
+    group.appendChild(seg)
+  }
 
   // F label (front = +Z direction)
-  const fLabel = createLabel('F', zColor, 0, -10)
-  fLabel.style.transform = `translate3d(0px, -10px, ${halfLen + 12}px)`
+  const fLabel = createLabel('F', zColor, 0, 0)
+  fLabel.style.transform = `translate3d(-8px, -10px, ${halfLen + 12}px)`
   group.appendChild(fLabel)
 
   // Bk label (back = -Z direction)
-  const bkLabel = createLabel('Bk', zColor, 0, -10)
-  bkLabel.style.transform = `translate3d(0px, -10px, ${-halfLen - 22}px)`
+  const bkLabel = createLabel('Bk', zColor, 0, 0)
+  bkLabel.style.transform = `translate3d(-12px, -10px, ${-halfLen - 28}px)`
   group.appendChild(bkLabel)
 
   const dot = document.createElement('div')
   dot.style.position = 'absolute'
-  dot.style.width = '8px'
-  dot.style.height = '8px'
+  dot.style.width = '10px'
+  dot.style.height = '10px'
   dot.style.borderRadius = '50%'
   dot.style.background = 'rgba(255,255,255,0.7)'
   dot.style.boxShadow = '0 0 12px rgba(255,255,255,0.5)'
