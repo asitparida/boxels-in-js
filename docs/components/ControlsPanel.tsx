@@ -127,7 +127,7 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
       <div className="controls-section">
         <h4>Effects</h4>
         <div className="effects-row">
-          <button className="effect-btn" onClick={onExplode}>Explode</button>
+          <button className="effect-btn" onClick={onExplode}>Expand</button>
           <button className="effect-btn" onClick={onCollapse}>Collapse</button>
         </div>
       </div>

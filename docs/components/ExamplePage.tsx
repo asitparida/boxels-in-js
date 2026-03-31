@@ -118,7 +118,7 @@ export function ExamplePage({
 
   useEffect(() => {
     if (explodeTrigger > lastExplode.current) {
-      instanceRef.current?.explode({ factor: 2.2, duration: 800 })
+      instanceRef.current?.animateGap({ from: controls.gap, to: 10, duration: 800 })
     }
     lastExplode.current = explodeTrigger
   }, [explodeTrigger])
@@ -148,7 +148,7 @@ export function ExamplePage({
 
   useEffect(() => {
     if (collapseTrigger > lastCollapse.current) {
-      instanceRef.current?.collapse()
+      instanceRef.current?.animateGap({ from: 10, to: 0, duration: 800 })
     }
     lastCollapse.current = collapseTrigger
   }, [collapseTrigger])
