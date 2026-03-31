@@ -146,6 +146,21 @@ a:hover {
   color: rgba(255, 255, 255, 0.35);
 }
 
+.mode-btns {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.mode-btns .toggle-btn {
+  background: rgba(20, 20, 30, 0.7);
+  backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  padding: 4px 12px;
+}
+
 .code-toggle {
   margin-left: auto;
   background: rgba(20, 20, 30, 0.7);

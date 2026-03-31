@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
+import { ImageExample } from './components/ImageExample'
 import { BasicExample } from './components/BasicExample'
 import { RubikExample } from './components/RubikExample'
 import { ArchitecturalExample } from './components/ArchitecturalExample'
@@ -8,7 +9,8 @@ import { PerformanceExample } from './components/PerformanceExample'
 import { ControlsPanel, type ControlsState } from './components/ControlsPanel'
 
 const examples = [
-  { path: '/', label: 'Basic', component: BasicExample },
+  { path: '/', label: 'Image Mapping', component: null },
+  { path: '/basic', label: 'Basic', component: BasicExample },
   { path: '/rubik', label: "Rubik's Cube", component: RubikExample },
   { path: '/architectural', label: 'Architectural', component: ArchitecturalExample },
   { path: '/glass', label: 'Glass', component: GlassExample },
@@ -54,20 +56,24 @@ export function App() {
         </aside>
         <main className="main-content">
           <Routes>
-            {examples.map((ex) => (
-              <Route
-                key={ex.path}
-                path={ex.path}
-                element={
-                  <ex.component
-                    controls={controls}
-                    onControlsChange={setControls}
-                    explodeTrigger={explodeTrigger}
-                    collapseTrigger={collapseTrigger}
-                  />
-                }
-              />
-            ))}
+            <Route path="/" element={<ImageExample />} />
+            {examples.filter(ex => ex.component).map((ex) => {
+              const Comp = ex.component!
+              return (
+                <Route
+                  key={ex.path}
+                  path={ex.path}
+                  element={
+                    <Comp
+                      controls={controls}
+                      onControlsChange={setControls}
+                      explodeTrigger={explodeTrigger}
+                      collapseTrigger={collapseTrigger}
+                    />
+                  }
+                />
+              )
+            })}
           </Routes>
         </main>
       </div>

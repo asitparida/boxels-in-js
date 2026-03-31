@@ -4,7 +4,10 @@
       "Bash(git ls-tree:*)",
       "Read(//Users/asitparida/Codebases/GitHub/sonify-elements/**)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npx vitest:*)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)"
     ],
     "additionalDirectories": [
       "/Users/asitparida/Downloads"
