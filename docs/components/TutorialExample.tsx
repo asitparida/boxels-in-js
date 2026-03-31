@@ -119,115 +119,175 @@ const faceSteps: { name: string; transform: string; color: string; css: string; 
 // Also used by later steps
 const faceData = faceSteps.map(({ name, transform, color }) => ({ name, transform, color }))
 
-function Step2() {
-  const [visibleCount, setVisibleCount] = useState(1)
-  const current = faceSteps[visibleCount - 1]
+function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: number }) {
+  const half = size / 2
+  return (
+    <div style={{
+      perspective: '400px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 8,
+    }}>
+      <div style={{
+        width: size,
+        height: size,
+        position: 'relative',
+        transformStyle: 'preserve-3d' as const,
+        transform: 'rotateX(-20deg) rotateY(30deg)',
+      }}>
+        {/* Ghost outline showing the cube boundary */}
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          border: '1px dashed rgba(255,255,255,0.08)',
+          transform: `translateZ(${half}px)`,
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          border: '1px dashed rgba(255,255,255,0.08)',
+          transform: `rotateY(180deg) translateZ(${half}px)`,
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          border: '1px dashed rgba(255,255,255,0.08)',
+          transform: `rotateY(-90deg) translateZ(${half}px)`,
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          border: '1px dashed rgba(255,255,255,0.08)',
+          transform: `rotateY(90deg) translateZ(${half}px)`,
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          border: '1px dashed rgba(255,255,255,0.08)',
+          transform: `rotateX(90deg) translateZ(${half}px)`,
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          border: '1px dashed rgba(255,255,255,0.08)',
+          transform: `rotateX(-90deg) translateZ(${half}px)`,
+        }} />
+        {/* The actual face */}
+        <div style={{
+          position: 'absolute',
+          width: size, height: size,
+          background: face.color.replace(/0\.\d+\)/, '0.5)'),
+          border: '1px solid rgba(108,182,255,0.8)',
+          transform: face.transform,
+          backfaceVisibility: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1rem',
+          color: 'rgba(255,255,255,0.9)',
+        }}>
+          {face.name}
+        </div>
+      </div>
+      <code style={{ color: '#6cb6ff', fontSize: '1rem' }}>{face.css}</code>
+    </div>
+  )
+}
 
+function Step2() {
   return (
     <section className="tutorial-step">
       <div className="tutorial-step-header">
         <h2>Step 2: Building a Cube — Face by Face</h2>
         <p className="tutorial-desc">
-          Every face starts as the same flat div sitting at the center. We rotate it to point in a
-          direction, then push it outward with <code>translateZ</code>. Click through to see each
-          face get added one at a time.
+          Every face starts as the same flat div at the center. We rotate it to point in a direction,
+          then push it outward with <code>translateZ</code>. Each face shown below in its own cube
+          outline — then combined at the end.
         </p>
       </div>
-      <div className="tutorial-columns">
-        <div className="tutorial-demo">
-          <div
-            style={{
-              perspective: '600px',
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 16,
-            }}
-          >
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button
-                className="toggle-btn small"
-                onClick={() => setVisibleCount(Math.max(1, visibleCount - 1))}
-                style={{ opacity: visibleCount <= 1 ? 0.3 : 1 }}
+
+      {/* Individual faces */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 24,
+        marginBottom: 32,
+      }}>
+        {faceSteps.map((face) => (
+          <div key={face.name} style={{
+            background: '#0c0c12',
+            border: '1px solid #1a1a22',
+            borderRadius: 6,
+            padding: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}>
+            <SingleFaceDemo face={face} size={70} />
+            <p style={{ color: '#666', fontSize: '1rem', marginTop: 8, textAlign: 'center', lineHeight: 1.4 }}>
+              {face.desc}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Combined */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 32,
+        background: '#0c0c12',
+        border: '1px solid #1a1a22',
+        borderRadius: 6,
+        padding: 24,
+      }}>
+        <div style={{
+          perspective: '600px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 160,
+          minHeight: 160,
+        }}>
+          <div style={{
+            width: FACE_SIZE,
+            height: FACE_SIZE,
+            position: 'relative',
+            transformStyle: 'preserve-3d' as const,
+            transform: 'rotateX(-25deg) rotateY(35deg)',
+          }}>
+            {faceSteps.map((f) => (
+              <div
+                key={f.name}
+                style={{
+                  position: 'absolute',
+                  width: FACE_SIZE,
+                  height: FACE_SIZE,
+                  background: f.color,
+                  border: '1px solid rgba(108,182,255,0.5)',
+                  transform: f.transform,
+                  backfaceVisibility: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1rem',
+                  color: 'rgba(255,255,255,0.5)',
+                }}
               >
-                Prev
-              </button>
-              <span style={{ color: '#888', fontSize: '1rem', minWidth: 100, textAlign: 'center' }}>
-                {visibleCount} / 6 faces
-              </span>
-              <button
-                className="toggle-btn small"
-                onClick={() => setVisibleCount(Math.min(6, visibleCount + 1))}
-                style={{ opacity: visibleCount >= 6 ? 0.3 : 1 }}
-              >
-                Next
-              </button>
-            </div>
-            <div
-              style={{
-                width: FACE_SIZE,
-                height: FACE_SIZE,
-                position: 'relative',
-                transformStyle: 'preserve-3d' as const,
-                transform: 'rotateX(-25deg) rotateY(35deg)',
-              }}
-            >
-              {faceSteps.slice(0, visibleCount).map((f, i) => (
-                <div
-                  key={f.name}
-                  style={{
-                    position: 'absolute',
-                    width: FACE_SIZE,
-                    height: FACE_SIZE,
-                    background: i === visibleCount - 1 ? f.color.replace('0.', '0.6') : f.color,
-                    border: `1px solid ${i === visibleCount - 1 ? 'rgba(108,182,255,0.9)' : 'rgba(108,182,255,0.4)'}`,
-                    transform: f.transform,
-                    backfaceVisibility: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1rem',
-                    color: i === visibleCount - 1 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
-                    transition: 'all 0.3s ease-out',
-                  }}
-                >
-                  {f.name}
-                </div>
-              ))}
-            </div>
+                {f.name}
+              </div>
+            ))}
           </div>
         </div>
-        <div className="tutorial-code">
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #1a1a22' }}>
-            <span style={{ color: '#6cb6ff', fontSize: '1rem', fontWeight: 600 }}>
-              {current.name}
-            </span>
-            <span style={{ color: '#666', fontSize: '1rem', marginLeft: 12 }}>
-              {current.desc}
-            </span>
-          </div>
-          <CodeBlock
-            language="javascript"
-            code={`// Face: ${current.name}
-// All faces start as the same div:
-const face = document.createElement('div');
-face.style.position = 'absolute';
-face.style.width = '${FACE_SIZE}px';
-face.style.height = '${FACE_SIZE}px';
-
-// The transform orients and positions it:
-face.style.transform = '${current.css}';
-
-// backfaceVisibility hides it when viewed
-// from behind (important for opaque cubes):
-face.style.backfaceVisibility = 'hidden';
-
-cube.appendChild(face);
-${visibleCount === 6 ? '\n// All 6 faces added — cube complete!' : `\n// ${visibleCount} of 6 faces placed. Click "Next" →`}`}
-          />
+        <div>
+          <p style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>
+            All 6 faces combined
+          </p>
+          <p style={{ color: '#666', fontSize: '1rem', lineHeight: 1.5 }}>
+            Same div, 6 different transforms. Each one rotates to face a direction, then
+            pushes outward by half the cube size. Together they form a hollow cube.
+          </p>
         </div>
       </div>
     </section>
