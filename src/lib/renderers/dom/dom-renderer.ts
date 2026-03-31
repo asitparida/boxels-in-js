@@ -60,6 +60,9 @@ export class DOMRenderer implements BoxelRenderer {
           }
         },
       )
+      if (this.options.zoom === false) {
+        this.orbitControls.disableZoom()
+      }
       this.orbitControls.attach(this.sceneEl)
     }
   }

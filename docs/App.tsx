@@ -62,6 +62,7 @@ export function App() {
                 element={
                   <ex.component
                     controls={controls}
+                    onControlsChange={setControls}
                     explodeTrigger={explodeTrigger}
                     collapseTrigger={collapseTrigger}
                   />

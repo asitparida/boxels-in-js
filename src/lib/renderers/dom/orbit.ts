@@ -46,6 +46,12 @@ export class OrbitControls {
     this.container = null
   }
 
+  private zoomEnabled = true
+
+  disableZoom(): void {
+    this.zoomEnabled = false
+  }
+
   getState(): OrbitState {
     return { rotX: this.rotX, rotY: this.rotY, scale: this.scale }
   }
@@ -80,6 +86,7 @@ export class OrbitControls {
   }
 
   private onWheel(e: WheelEvent): void {
+    if (!this.zoomEnabled) return
     e.preventDefault()
     const delta = e.deltaY > 0 ? 0.95 : 1.05
     this.scale = Math.max(0.1, Math.min(5, this.scale * delta))

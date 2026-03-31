@@ -105,13 +105,14 @@ export interface ExamplePageProps {
   description: string
   code: string
   controls: ControlsState
+  onControlsChange: (controls: ControlsState) => void
   explodeTrigger: number
   collapseTrigger: number
   setup?: (b: Boxels, state: ControlsState) => void
 }
 
 export function ExamplePage({
-  title, description, code, controls, explodeTrigger, collapseTrigger, setup,
+  title, description, code, controls, onControlsChange, explodeTrigger, collapseTrigger, setup,
 }: ExamplePageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Boxels | null>(null)
@@ -140,6 +141,7 @@ export function ExamplePage({
       camera: { rotation: [-25, 35] },
       style,
       showBackfaces: controls.backfaces,
+      zoom: false,
     })
 
     if (setup) {
@@ -166,6 +168,22 @@ export function ExamplePage({
       }
     }
   }, [rebuild])
+
+  // Mouse wheel controls boxel size
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const delta = e.deltaY > 0 ? -5 : 5
+      const newSize = Math.max(10, Math.min(200, controls.boxelSize + delta))
+      if (newSize !== controls.boxelSize) {
+        onControlsChange({ ...controls, boxelSize: newSize })
+      }
+    }
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [controls, onControlsChange])
 
   // Axis lines — show when spin is active
   useEffect(() => {
