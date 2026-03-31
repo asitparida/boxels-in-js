@@ -28,7 +28,7 @@ const allNavItems = [
 export function App() {
   const [controls, setControls] = useState<ControlsState>({
     sizeX: 2, sizeY: 2, sizeZ: 2,
-    gap: 2, boxelSize: 60, edgeWidth: 1, preset: 'glass', hue: 220, opacity: 80, backfaces: false,
+    gap: 2, boxelSize: 60, edgeWidth: 1, texture: 'glass', hue: 220, opacity: 80, backfaces: false,
     spinX: false, spinXDir: 1, spinY: false, spinYDir: 1, spinSpeed: 1, showAxis: true,
     imageFace: 'all', imageDataUrl: null,
   })

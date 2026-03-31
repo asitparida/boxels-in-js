@@ -1,75 +1,15 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { Boxels, type BoxelStyle } from 'boxels'
+import { Boxels, type BoxelStyle, type TextureName } from 'boxels'
+import { createTextureStyle } from '../../src/lib/core/textures'
 import { type ControlsState } from './ControlsPanel'
 import { CodeDrawer } from './CodeDrawer'
 
-export function buildStyle(controls: ControlsState): BoxelStyle | undefined {
-  const { preset, hue, opacity: opPct, sizeX: w, sizeY: h, sizeZ: d } = controls
-  const op = opPct / 100
-  if (preset === 'none') return { default: { opacity: op } }
-
-  switch (preset) {
-    case 'xray': {
-      const cx = w / 2, cy = h / 2, cz = d / 2
-      const maxDist = Math.sqrt(cx * cx + cy * cy + cz * cz)
-      return {
-        default: (x: number, y: number, z: number) => {
-          const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2)
-          const distOp = 0.1 + (dist / Math.max(maxDist, 1)) * 0.6
-          return {
-            fill: `oklch(0.7 0.12 ${hue})`,
-            stroke: `oklch(0.5 0.12 ${hue})`,
-            opacity: distOp * op,
-          }
-        },
-      }
-    }
-    case 'glass':
-      return {
-        default: {
-          fill: `oklch(0.8 0.06 ${hue} / ${0.15 * op})`,
-          stroke: `oklch(0.5 0.08 ${hue} / ${0.4 * op})`,
-          opacity: op,
-          backdropFilter: `blur(${Math.round(4 * op)}px)`,
-        },
-      }
-    case 'neon':
-      return {
-        default: {
-          fill: `rgba(10, 10, 15, ${0.9 * op})`,
-          stroke: `oklch(0.8 0.2 ${hue})`,
-          opacity: op,
-        },
-      }
-    case 'gradient':
-      return {
-        default: (x: number, y: number, z: number) => {
-          const h2 = (hue + (x / Math.max(w, 1)) * 120) % 360
-          const lightness = 0.4 + (y / Math.max(h, 1)) * 0.4
-          const chroma = 0.1 + (z / Math.max(d, 1)) * 0.1
-          return {
-            fill: `oklch(${lightness} ${chroma} ${h2})`,
-            stroke: `oklch(${lightness - 0.1} ${chroma} ${h2})`,
-            opacity: op,
-          }
-        },
-      }
-    default: {
-      const base = Boxels.presets[preset as keyof typeof Boxels.presets](w, h, d)
-      if (base.default && typeof base.default !== 'function') {
-        base.default = { ...base.default, opacity: op }
-      }
-      return base
-    }
-  }
+export function buildStyle(controls: ControlsState): BoxelStyle {
+  const { texture, hue, opacity: opPct, sizeX: w, sizeY: h, sizeZ: d } = controls
+  return createTextureStyle(texture as TextureName, hue, opPct / 100, w, h, d)
 }
 
 export function generateCode(controls: ControlsState, extra?: string): string {
-  const presetLine = controls.preset !== 'none'
-    ? `\n  style: Boxels.presets.${controls.preset}(${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}),`
-    : ''
-  const backfaceLine = controls.backfaces ? '\n  showBackfaces: true,' : ''
-
   const lines: string[] = []
   lines.push(`import { Boxels } from 'boxels'`)
   lines.push('')
@@ -78,14 +18,12 @@ export function generateCode(controls: ControlsState, extra?: string): string {
   lines.push(`  gap: ${controls.gap},`)
   lines.push(`  edgeWidth: ${controls.edgeWidth},`)
   lines.push(`  camera: { rotation: [-25, 35] },`)
-  if (controls.preset !== 'none') {
-    lines.push(`  style: Boxels.presets.${controls.preset}(${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}),`)
-  }
   if (controls.backfaces) lines.push(`  showBackfaces: true,`)
   lines.push(`})`)
   lines.push('')
   lines.push(`b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })`)
   lines.push(`b.mount(document.getElementById('scene'))`)
+  lines.push(`b.setTexture('${controls.texture}', ${controls.hue}, ${(controls.opacity / 100).toFixed(2)})`)
   if (controls.showAxis) lines.push(`b.showAxes()`)
   if (controls.spinX || controls.spinY) {
     const opts: string[] = []

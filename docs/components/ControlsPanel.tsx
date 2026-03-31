@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 
-const PRESET_NAMES = ['none', 'rubik', 'gradient', 'wireframe', 'xray', 'glass', 'marble', 'neon'] as const
+const TEXTURE_NAMES = ['solid', 'hollow', 'glass', 'frosted', 'matte', 'glossy', 'neon', 'paper', 'metal', 'hologram'] as const
 const FACE_OPTIONS = ['all', 'top', 'bottom', 'front', 'back', 'left', 'right'] as const
 
 export interface ControlsState {
@@ -10,7 +10,7 @@ export interface ControlsState {
   gap: number
   boxelSize: number
   edgeWidth: number
-  preset: string
+  texture: string
   hue: number
   opacity: number
   backfaces: boolean
@@ -86,13 +86,13 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
       </div>
 
       <div className="controls-section">
-        <h4>Preset</h4>
+        <h4>Texture</h4>
         <div className="preset-grid">
-          {PRESET_NAMES.map((name) => (
+          {TEXTURE_NAMES.map((name) => (
             <button
               key={name}
-              className={`preset-btn ${state.preset === name ? 'active' : ''}`}
-              onClick={() => update({ preset: name })}
+              className={`preset-btn ${state.texture === name ? 'active' : ''}`}
+              onClick={() => update({ texture: name })}
             >
               {name}
             </button>

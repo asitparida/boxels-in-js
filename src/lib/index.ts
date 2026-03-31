@@ -18,6 +18,7 @@ import { createExplodeAnimation } from './animation/explode'
 import { createLayerRotateAnimation } from './animation/layer-rotate'
 import { createGapTween, createOpacityTween, createEachTween } from './animation/tweens'
 import { presets } from './presets/styles'
+import { createTextureStyle, ALL_TEXTURES, type TextureName } from './core/textures'
 
 export type {
   BoxelsOptions, BoxelStyle, BoxelEvent, BoxelEventType, Vec3,
@@ -30,8 +31,12 @@ export type {
 
 type EventCallback = (event: BoxelEvent | Event) => void
 
+export type { TextureName }
+export { ALL_TEXTURES }
+
 export class Boxels {
   static presets = presets
+  static textures = ALL_TEXTURES
 
   private grid: BoxelGrid
   private renderer: BoxelRenderer
@@ -238,6 +243,17 @@ export class Boxels {
         this.grid.setBoxel(x, y, z, { ...existing, style: opts.style })
       }
     }
+    this.renderScene()
+  }
+
+  // ── Textures ──
+
+  setTexture(texture: TextureName, hue: number = 220, opacity: number = 1): void {
+    const bounds = this.grid.getBounds()
+    const w = bounds.max[0] - bounds.min[0] + 1
+    const h = bounds.max[1] - bounds.min[1] + 1
+    const d = bounds.max[2] - bounds.min[2] + 1
+    this.globalStyle = createTextureStyle(texture, hue, opacity, w, h, d)
     this.renderScene()
   }
 

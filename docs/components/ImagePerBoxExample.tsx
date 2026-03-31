@@ -117,13 +117,8 @@ export function ImagePerBoxExample({ controls }: Props) {
   const { sizeX, sizeY, sizeZ } = controls
   const totalCells = (sizeX * sizeY * 2) + (sizeX * sizeZ * 2) + (sizeY * sizeZ * 2)
 
-  const code = generateCode(controls, `// Apply a unique image to each exposed face cell
-const world = b.getWorldContainer()
-world.querySelectorAll('[data-face]').forEach((faceEl, i) => {
-  const icon = icons[i % icons.length]
-  faceEl.style.backgroundImage = \`url(\${icon})\`
-  faceEl.style.backgroundSize = 'cover'
-})`)
+  const code = generateCode(controls, `// Map unique image per cell
+b.mapImagePerCell(icons)`)
 
   return (
     <div className="example-page">
