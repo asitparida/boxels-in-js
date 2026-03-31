@@ -65,30 +65,72 @@ function Step1() {
 }
 
 /* ────────────────────────────────────────────
-   Step 2: The 6 faces of a cube
+   Step 2: Building a cube face by face
    ──────────────────────────────────────────── */
 
 const FACE_SIZE = 80
 const HALF = FACE_SIZE / 2
 
-const faceData: { name: string; transform: string; color: string }[] = [
-  { name: 'front',  transform: `translateZ(${HALF}px)`,                      color: 'rgba(108,182,255,0.35)' },
-  { name: 'back',   transform: `rotateY(180deg) translateZ(${HALF}px)`,      color: 'rgba(108,182,255,0.2)' },
-  { name: 'left',   transform: `rotateY(-90deg) translateZ(${HALF}px)`,      color: 'rgba(80,140,220,0.35)' },
-  { name: 'right',  transform: `rotateY(90deg) translateZ(${HALF}px)`,       color: 'rgba(80,140,220,0.25)' },
-  { name: 'top',    transform: `rotateX(90deg) translateZ(${HALF}px)`,       color: 'rgba(140,200,255,0.4)' },
-  { name: 'bottom', transform: `rotateX(-90deg) translateZ(${HALF}px)`,      color: 'rgba(60,100,180,0.3)' },
+const faceSteps: { name: string; transform: string; color: string; css: string; desc: string }[] = [
+  {
+    name: 'front',
+    transform: `translateZ(${HALF}px)`,
+    color: 'rgba(108,182,255,0.35)',
+    css: `translateZ(${HALF}px)`,
+    desc: 'Push forward along Z by half the cube size. This is the simplest — no rotation needed.',
+  },
+  {
+    name: 'back',
+    transform: `rotateY(180deg) translateZ(${HALF}px)`,
+    color: 'rgba(108,182,255,0.2)',
+    css: `rotateY(180deg) translateZ(${HALF}px)`,
+    desc: 'Rotate 180° around Y to face backward, then push out. The div now faces the opposite direction.',
+  },
+  {
+    name: 'left',
+    transform: `rotateY(-90deg) translateZ(${HALF}px)`,
+    color: 'rgba(80,140,220,0.35)',
+    css: `rotateY(-90deg) translateZ(${HALF}px)`,
+    desc: 'Rotate -90° around Y to face left, then push out.',
+  },
+  {
+    name: 'right',
+    transform: `rotateY(90deg) translateZ(${HALF}px)`,
+    color: 'rgba(80,140,220,0.25)',
+    css: `rotateY(90deg) translateZ(${HALF}px)`,
+    desc: 'Rotate 90° around Y to face right, then push out.',
+  },
+  {
+    name: 'top',
+    transform: `rotateX(90deg) translateZ(${HALF}px)`,
+    color: 'rgba(140,200,255,0.4)',
+    css: `rotateX(90deg) translateZ(${HALF}px)`,
+    desc: 'Rotate 90° around X to face upward, then push out. Now we use rotateX instead of rotateY.',
+  },
+  {
+    name: 'bottom',
+    transform: `rotateX(-90deg) translateZ(${HALF}px)`,
+    color: 'rgba(60,100,180,0.3)',
+    css: `rotateX(-90deg) translateZ(${HALF}px)`,
+    desc: 'Rotate -90° around X to face downward, then push out. All 6 faces are in place — a cube.',
+  },
 ]
 
+// Also used by later steps
+const faceData = faceSteps.map(({ name, transform, color }) => ({ name, transform, color }))
+
 function Step2() {
+  const [visibleCount, setVisibleCount] = useState(1)
+  const current = faceSteps[visibleCount - 1]
+
   return (
     <section className="tutorial-step">
       <div className="tutorial-step-header">
-        <h2>Step 2: The 6 Faces of a Cube</h2>
+        <h2>Step 2: Building a Cube — Face by Face</h2>
         <p className="tutorial-desc">
-          A cube is 6 squares, each moved outward by half the cube size along the correct axis.
-          Every face starts as a flat div at the center, then gets rotated to face a direction
-          and pushed out with <code>translateZ</code>.
+          Every face starts as the same flat div sitting at the center. We rotate it to point in a
+          direction, then push it outward with <code>translateZ</code>. Click through to see each
+          face get added one at a time.
         </p>
       </div>
       <div className="tutorial-columns">
@@ -99,10 +141,31 @@ function Step2() {
               width: '100%',
               height: '100%',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: 16,
             }}
           >
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                className="toggle-btn small"
+                onClick={() => setVisibleCount(Math.max(1, visibleCount - 1))}
+                style={{ opacity: visibleCount <= 1 ? 0.3 : 1 }}
+              >
+                Prev
+              </button>
+              <span style={{ color: '#888', fontSize: '1rem', minWidth: 100, textAlign: 'center' }}>
+                {visibleCount} / 6 faces
+              </span>
+              <button
+                className="toggle-btn small"
+                onClick={() => setVisibleCount(Math.min(6, visibleCount + 1))}
+                style={{ opacity: visibleCount >= 6 ? 0.3 : 1 }}
+              >
+                Next
+              </button>
+            </div>
             <div
               style={{
                 width: FACE_SIZE,
@@ -112,22 +175,23 @@ function Step2() {
                 transform: 'rotateX(-25deg) rotateY(35deg)',
               }}
             >
-              {faceData.map((f) => (
+              {faceSteps.slice(0, visibleCount).map((f, i) => (
                 <div
                   key={f.name}
                   style={{
                     position: 'absolute',
                     width: FACE_SIZE,
                     height: FACE_SIZE,
-                    background: f.color,
-                    border: '1px solid rgba(108,182,255,0.5)',
+                    background: i === visibleCount - 1 ? f.color.replace('0.', '0.6') : f.color,
+                    border: `1px solid ${i === visibleCount - 1 ? 'rgba(108,182,255,0.9)' : 'rgba(108,182,255,0.4)'}`,
                     transform: f.transform,
                     backfaceVisibility: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '0.75rem',
-                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '1rem',
+                    color: i === visibleCount - 1 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+                    transition: 'all 0.3s ease-out',
                   }}
                 >
                   {f.name}
@@ -137,23 +201,32 @@ function Step2() {
           </div>
         </div>
         <div className="tutorial-code">
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #1a1a22' }}>
+            <span style={{ color: '#6cb6ff', fontSize: '1rem', fontWeight: 600 }}>
+              {current.name}
+            </span>
+            <span style={{ color: '#666', fontSize: '1rem', marginLeft: 12 }}>
+              {current.desc}
+            </span>
+          </div>
           <CodeBlock
             language="javascript"
-            code={`// Each face is an absolutely positioned div.
-// The cube container has transform-style: preserve-3d.
+            code={`// Face: ${current.name}
+// All faces start as the same div:
+const face = document.createElement('div');
+face.style.position = 'absolute';
+face.style.width = '${FACE_SIZE}px';
+face.style.height = '${FACE_SIZE}px';
 
-const half = size / 2;
+// The transform orients and positions it:
+face.style.transform = '${current.css}';
 
-front:   translateZ(half)
-back:    rotateY(180deg)  translateZ(half)
-left:    rotateY(-90deg)  translateZ(half)
-right:   rotateY(90deg)   translateZ(half)
-top:     rotateX(90deg)   translateZ(half)
-bottom:  rotateX(-90deg)  translateZ(half)
+// backfaceVisibility hides it when viewed
+// from behind (important for opaque cubes):
+face.style.backfaceVisibility = 'hidden';
 
-// rotateY points the face in that direction,
-// then translateZ pushes it outward along
-// the face's new local Z axis.`}
+cube.appendChild(face);
+${visibleCount === 6 ? '\n// All 6 faces added — cube complete!' : `\n// ${visibleCount} of 6 faces placed. Click "Next" →`}`}
           />
         </div>
       </div>
