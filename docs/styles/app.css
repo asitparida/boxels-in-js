@@ -278,6 +278,15 @@ a:hover {
   color: #aaa;
 }
 
+.toggle-btn.small {
+  padding: 3px 10px;
+}
+
+.axis-btns {
+  display: flex;
+  gap: 4px;
+}
+
 .toggle-btn.active {
   background: #141e2a;
   border-color: #6cb6ff;

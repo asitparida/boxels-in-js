@@ -12,6 +12,9 @@ export interface ControlsState {
   preset: string
   hue: number
   backfaces: boolean
+  autoRotate: boolean
+  autoRotateAxis: 'x' | 'y'
+  autoRotateSpeed: number
 }
 
 interface ControlsPanelProps {
@@ -76,6 +79,37 @@ export function ControlsPanel({ state, onChange, onExplode, onCollapse }: Contro
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="controls-section">
+        <h4>Animate</h4>
+        <div className="control-row">
+          <span className="control-label">Spin</span>
+          <button
+            className={`toggle-btn ${state.autoRotate ? 'active' : ''}`}
+            onClick={() => update({ autoRotate: !state.autoRotate })}
+          >
+            {state.autoRotate ? 'ON' : 'OFF'}
+          </button>
+        </div>
+        {state.autoRotate && (
+          <>
+            <div className="control-row">
+              <span className="control-label">Axis</span>
+              <div className="axis-btns">
+                <button
+                  className={`toggle-btn small ${state.autoRotateAxis === 'x' ? 'active' : ''}`}
+                  onClick={() => update({ autoRotateAxis: 'x' })}
+                >X</button>
+                <button
+                  className={`toggle-btn small ${state.autoRotateAxis === 'y' ? 'active' : ''}`}
+                  onClick={() => update({ autoRotateAxis: 'y' })}
+                >Y</button>
+              </div>
+            </div>
+            <Slider label="Speed" value={state.autoRotateSpeed} min={1} max={10} onChange={(v) => update({ autoRotateSpeed: v })} />
+          </>
+        )}
       </div>
 
       <div className="controls-section">

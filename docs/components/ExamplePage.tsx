@@ -123,6 +123,30 @@ export function ExamplePage({
     lastExplode.current = explodeTrigger
   }, [explodeTrigger])
 
+  // Auto-rotate
+  useEffect(() => {
+    if (!controls.autoRotate) return
+    const speed = controls.autoRotateSpeed * 0.3
+    let angle = 0
+    let rafId: number
+
+    const tick = () => {
+      angle += speed
+      const b = instanceRef.current
+      if (b) {
+        if (controls.autoRotateAxis === 'y') {
+          b.updateTransform(-25, angle)
+        } else {
+          b.updateTransform(angle, 35)
+        }
+      }
+      rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+
+    return () => cancelAnimationFrame(rafId)
+  }, [controls.autoRotate, controls.autoRotateAxis, controls.autoRotateSpeed])
+
   useEffect(() => {
     if (collapseTrigger > lastCollapse.current) {
       instanceRef.current?.collapse()

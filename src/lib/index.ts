@@ -156,6 +156,12 @@ export class Boxels {
     return this.grid.getExposure(position[0], position[1], position[2])
   }
 
+  // ── Camera ──
+
+  updateTransform(rotX: number, rotY: number): void {
+    this.renderer.updateTransform(rotX, rotY)
+  }
+
   // ── Styling ──
 
   styleBox(opts: StyleBoxOptions): void {
