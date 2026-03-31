@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { type FaceName } from 'boxels'
-import { type ExamplePageProps } from './ExamplePage'
+import { type ExamplePageProps, generateCode } from './ExamplePage'
+import { CodeDrawer } from './CodeDrawer'
 import { useBoxelScene } from './useBoxelScene'
 
 // Import all icons
@@ -70,6 +71,7 @@ type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTr
 
 export function ImagePerBoxExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [showCode, setShowCode] = useState(true)
   const [tileCache, setTileCache] = useState<Map<string, string> | null>(null)
 
   // Pre-render all icon+color combos we might need
@@ -115,17 +117,29 @@ export function ImagePerBoxExample({ controls }: Props) {
   const { sizeX, sizeY, sizeZ } = controls
   const totalCells = (sizeX * sizeY * 2) + (sizeX * sizeZ * 2) + (sizeY * sizeZ * 2)
 
+  const code = generateCode(controls, `// Apply a unique image to each exposed face cell
+const world = b.getWorldContainer()
+world.querySelectorAll('[data-face]').forEach((faceEl, i) => {
+  const icon = icons[i % icons.length]
+  faceEl.style.backgroundImage = \`url(\${icon})\`
+  faceEl.style.backgroundSize = 'cover'
+})`)
+
   return (
     <div className="example-page">
       <div className="scene-area">
         <div className="scene-header">
           <span className="scene-title">Per Cell</span>
           <span className="scene-desc">
-            {totalCells} cells — {ALL_ICONS.length} social icons distributed with color per face
+            {totalCells} cells — {ALL_ICONS.length} social icons distributed
           </span>
+          <button className="code-toggle" onClick={() => setShowCode(!showCode)}>
+            {showCode ? 'Hide code' : 'Show code'}
+          </button>
         </div>
         <div ref={containerRef} className="scene-container" />
       </div>
+      <CodeDrawer code={code} visible={showCode} />
     </div>
   )
 }

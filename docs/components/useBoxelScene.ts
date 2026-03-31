@@ -28,7 +28,9 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
 
   const xColor = 'rgba(255, 100, 100, 0.6)'
   const yColor = 'rgba(100, 180, 255, 0.6)'
+  const zColor = 'rgba(100, 255, 160, 0.6)'
 
+  // X axis — Left / Right
   const xLine = document.createElement('div')
   xLine.style.position = 'absolute'
   xLine.style.width = `${halfLen * 2}px`
@@ -39,6 +41,7 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   group.appendChild(createLabel('L', xColor, -halfLen - 22, -10))
   group.appendChild(createLabel('R', xColor, halfLen + 8, -10))
 
+  // Y axis — Top / Bottom
   const yLine = document.createElement('div')
   yLine.style.position = 'absolute'
   yLine.style.width = '2px'
@@ -48,6 +51,25 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   group.appendChild(yLine)
   group.appendChild(createLabel('T', yColor, -10, -halfLen - 26))
   group.appendChild(createLabel('B', yColor, -10, halfLen + 8))
+
+  // Z axis — Front / Back (rotated into the Z plane)
+  const zLine = document.createElement('div')
+  zLine.style.position = 'absolute'
+  zLine.style.width = `${halfLen * 2}px`
+  zLine.style.height = '2px'
+  zLine.style.background = `linear-gradient(90deg, transparent, ${zColor} 10%, ${zColor} 90%, transparent)`
+  zLine.style.transform = `rotateY(90deg) translate3d(${-halfLen}px, 0px, 0px)`
+  group.appendChild(zLine)
+
+  // F label (front = +Z direction)
+  const fLabel = createLabel('F', zColor, 0, -10)
+  fLabel.style.transform = `translate3d(0px, -10px, ${halfLen + 12}px)`
+  group.appendChild(fLabel)
+
+  // Bk label (back = -Z direction)
+  const bkLabel = createLabel('Bk', zColor, 0, -10)
+  bkLabel.style.transform = `translate3d(0px, -10px, ${-halfLen - 22}px)`
+  group.appendChild(bkLabel)
 
   const dot = document.createElement('div')
   dot.style.position = 'absolute'

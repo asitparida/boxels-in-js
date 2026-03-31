@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { type FaceName } from 'boxels'
-import { type ExamplePageProps } from './ExamplePage'
+import { type ExamplePageProps, generateCode } from './ExamplePage'
+import { CodeDrawer } from './CodeDrawer'
 import { useBoxelScene } from './useBoxelScene'
 
 import iconX from '../assets/icon-x.svg'
@@ -43,6 +44,7 @@ type Props = Pick<ExamplePageProps, 'controls' | 'onControlsChange' | 'explodeTr
 
 export function ImagePerFaceExample({ controls }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [showCode, setShowCode] = useState(true)
   const [iconCache, setIconCache] = useState<Record<string, string> | null>(null)
 
   useEffect(() => {
@@ -65,15 +67,26 @@ export function ImagePerFaceExample({ controls }: Props) {
 
   useBoxelScene(containerRef, controls, afterMount)
 
+  const code = generateCode(controls, `b.mapImage('x-icon.png', 'front')
+b.mapImage('github-icon.png', 'back')
+b.mapImage('instagram-icon.png', 'left')
+b.mapImage('linkedin-icon.png', 'right')
+b.mapImage('youtube-icon.png', 'top')
+b.mapImage('tiktok-icon.png', 'bottom')`)
+
   return (
     <div className="example-page">
       <div className="scene-area">
         <div className="scene-header">
           <span className="scene-title">Per Face</span>
-          <span className="scene-desc">Different icon on each face — X, GitHub, Instagram, LinkedIn, YouTube, TikTok</span>
+          <span className="scene-desc">Different icon on each face</span>
+          <button className="code-toggle" onClick={() => setShowCode(!showCode)}>
+            {showCode ? 'Hide code' : 'Show code'}
+          </button>
         </div>
         <div ref={containerRef} className="scene-container" />
       </div>
+      <CodeDrawer code={code} visible={showCode} />
     </div>
   )
 }

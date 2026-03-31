@@ -161,6 +161,26 @@ a:hover {
   padding: 4px 12px;
 }
 
+.code-toggle {
+  margin-left: auto;
+  background: rgba(20, 20, 30, 0.7);
+  backdrop-filter: blur(8px);
+  color: #888;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 1rem;
+  font-family: 'Geist Mono', monospace;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.15s;
+}
+
+.code-toggle:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 .scene-container {
   flex: 1;
   background: url('./bg.jpg') center / cover no-repeat;
@@ -170,10 +190,37 @@ a:hover {
 /* ── Code drawer ── */
 
 .code-drawer {
-  max-height: 200px;
+  min-height: 280px;
+  max-height: 40vh;
   overflow-y: auto;
   border-top: 1px solid #1a1a22;
   flex-shrink: 0;
+  position: relative;
+}
+
+.code-drag-handle {
+  position: sticky;
+  top: 0;
+  height: 8px;
+  cursor: ns-resize;
+  background: transparent;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-drag-handle::after {
+  content: '';
+  width: 40px;
+  height: 3px;
+  border-radius: 2px;
+  background: #333;
+  transition: background 0.15s;
+}
+
+.code-drag-handle:hover::after {
+  background: #666;
 }
 
 .code-drawer .code-block {

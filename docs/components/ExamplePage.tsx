@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 import { Boxels, type BoxelStyle } from 'boxels'
 import { type ControlsState } from './ControlsPanel'
-import { CodeBlock } from './CodeBlock'
+import { CodeDrawer } from './CodeDrawer'
 
 export function buildStyle(controls: ControlsState): BoxelStyle | undefined {
   const { preset, hue, opacity: opPct, sizeX: w, sizeY: h, sizeZ: d } = controls
@@ -131,7 +131,7 @@ function createLocalAxes(halfLen: number): HTMLDivElement {
   return group
 }
 
-function generateCode(controls: ControlsState): string {
+export function generateCode(controls: ControlsState, extra?: string): string {
   const presetLine = controls.preset !== 'none'
     ? `\n  style: Boxels.presets.${controls.preset}(${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}),`
     : ''
@@ -147,7 +147,7 @@ const b = new Boxels({
 })
 
 b.addBox({ position: [0, 0, 0], size: [${controls.sizeX}, ${controls.sizeY}, ${controls.sizeZ}] })
-b.mount(document.getElementById('scene'))`
+b.mount(document.getElementById('scene'))${extra ? '\n\n' + extra : ''}`
 }
 
 export interface ExamplePageProps {
@@ -169,6 +169,7 @@ export function ExamplePage({
   const lastExplode = useRef(0)
   const lastCollapse = useRef(0)
   const rotRef = useRef({ rotX: -25, rotY: 35 })
+  const [showCode, setShowCode] = useState(true)
   const [rebuildCount, setRebuildCount] = useState(0)
 
   const rebuild = useCallback(() => {
@@ -321,12 +322,16 @@ export function ExamplePage({
         <div className="scene-header">
           <span className="scene-title">{title}</span>
           <span className="scene-desc">{description}</span>
+          <button
+            className="code-toggle"
+            onClick={() => setShowCode(!showCode)}
+          >
+            {showCode ? 'Hide code' : 'Show code'}
+          </button>
         </div>
         <div ref={containerRef} className="scene-container" />
       </div>
-      <div className="code-drawer">
-        <CodeBlock code={dynamicCode} />
-      </div>
+      <CodeDrawer code={dynamicCode} visible={showCode} />
     </div>
   )
 }
