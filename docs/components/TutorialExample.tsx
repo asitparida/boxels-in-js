@@ -214,61 +214,25 @@ function Step2() {
         </p>
       </div>
 
-      {/* Individual faces */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 24,
-        marginBottom: 32,
-      }}>
+      {/* Individual faces — 2 column grid */}
+      <div className="tutorial-face-grid">
         {faceSteps.map((face) => (
-          <div key={face.name} style={{
-            background: '#0c0c12',
-            border: '1px solid #1a1a22',
-            borderRadius: 6,
-            padding: 16,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 8,
-          }}>
-            <SingleFaceDemo face={face} size={70} />
-            <p style={{ color: '#666', fontSize: '1rem', textAlign: 'center', lineHeight: 1.4 }}>
-              {face.desc}
-            </p>
-            <pre style={{
-              background: '#080810',
-              border: '1px solid #1a1a22',
-              borderRadius: 4,
-              padding: '6px 10px',
-              fontSize: '1rem',
-              color: '#98c379',
-              width: '100%',
-              margin: 0,
-              whiteSpace: 'pre-wrap',
-            }}>
-{`.${face.name} {
-  position: absolute;
-  width: ${FACE_SIZE}px;
-  height: ${FACE_SIZE}px;
-  transform: ${face.css};
-  backface-visibility: hidden;
-}`}
-            </pre>
+          <div key={face.name} className="tutorial-face-card">
+            <div style={{ flexShrink: 0 }}>
+              <SingleFaceDemo face={face} size={70} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ color: '#999', fontSize: '1rem', lineHeight: 1.4, marginBottom: 8 }}>
+                {face.desc}
+              </p>
+              <CodeBlock code={`.${face.name} {\n  position: absolute;\n  width: ${FACE_SIZE}px;\n  height: ${FACE_SIZE}px;\n  transform: ${face.css};\n  backface-visibility: hidden;\n}`} language="javascript" />
+            </div>
           </div>
         ))}
       </div>
 
       {/* Combined */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 32,
-        background: '#0c0c12',
-        border: '1px solid #1a1a22',
-        borderRadius: 6,
-        padding: 24,
-      }}>
+      <div className="tutorial-combined">
         <div style={{
           perspective: '600px',
           display: 'flex',

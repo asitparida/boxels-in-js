@@ -505,33 +505,34 @@ a:hover {
 /* ── Tutorial Page ── */
 
 .tutorial-page {
-  padding: 40px 48px 80px;
+  padding: 32px 40px 80px;
   overflow-y: auto;
-  max-height: 100vh;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .tutorial-hero {
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 
 .tutorial-hero h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .tutorial-hero p {
   font-size: 1rem;
-  color: #666;
+  color: #555;
   max-width: 600px;
   line-height: 1.6;
 }
 
 .tutorial-step {
-  margin-bottom: 56px;
-  border-top: 1px solid #1a1a22;
-  padding-top: 32px;
+  margin-bottom: 48px;
+  border-top: 1px solid #141418;
+  padding-top: 28px;
 }
 
 .tutorial-step-header {
@@ -539,15 +540,15 @@ a:hover {
 }
 
 .tutorial-step-header h2 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 8px;
 }
 
 .tutorial-desc {
   font-size: 1rem;
-  color: #777;
+  color: #666;
   line-height: 1.6;
   max-width: 700px;
 }
@@ -562,14 +563,14 @@ a:hover {
 
 .tutorial-columns {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   align-items: stretch;
 }
 
 .tutorial-demo {
   flex: 1;
-  min-height: 280px;
-  background: #0c0c12;
+  min-height: 240px;
+  background: #0a0a10;
   border: 1px solid #1a1a22;
   border-radius: 6px;
   overflow: hidden;
@@ -582,16 +583,50 @@ a:hover {
 
 .tutorial-code .code-block {
   height: 100%;
+  margin: 0;
+}
+
+.tutorial-face-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tutorial-face-card {
+  background: #0a0a10;
+  border: 1px solid #1a1a22;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.tutorial-face-card .code-block {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.tutorial-combined {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  background: #0a0a10;
+  border: 1px solid #1a1a22;
+  border-radius: 6px;
+  padding: 24px;
 }
 
 .tutorial-footer {
-  border-top: 1px solid #1a1a22;
-  padding-top: 32px;
+  border-top: 1px solid #141418;
+  padding-top: 28px;
 }
 
 .tutorial-footer p {
   font-size: 1rem;
-  color: #666;
+  color: #555;
   line-height: 1.6;
 }
 
