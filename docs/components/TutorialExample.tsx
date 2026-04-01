@@ -190,8 +190,7 @@ function Step2() {
         <h2>Step 2: Building a Cube — Face by Face</h2>
         <p className="tutorial-desc">
           Every face starts as the same flat div at the center. We rotate it to point in a direction,
-          then push it outward with <code>translateZ</code>. Each face shown below in its own cube
-          outline — then combined at the end.
+          then push it outward with <code>translateZ</code>. Each face shown below with its CSS.
         </p>
       </div>
 
@@ -210,9 +209,9 @@ function Step2() {
                   <SingleFaceDemo face={face} size={80} />
                 </div>
                 <div className="tutorial-face-row-info">
-                  <p style={{ color: '#222', fontSize: '0.9375rem', fontWeight: 600, marginBottom: 4 }}>{face.name}</p>
+                  <p style={{ color: FACE_SOLID_COLORS[face.name], fontSize: '0.9375rem', fontWeight: 600, marginBottom: 4 }}>{face.name}</p>
                   <p style={{ color: '#888', fontSize: '0.9375rem', lineHeight: 1.5, marginBottom: 10 }}>{face.desc}</p>
-                  <CodeBlock code={`<div style="\n  position: absolute;\n  width: ${FACE_SIZE}px;\n  height: ${FACE_SIZE}px;\n  transform: ${face.css};\n  backface-visibility: hidden;\n" />`} language="javascript" />
+                  <CodeBlock code={`<!-- ${face.name} -->\n<div style="\n  position: absolute;\n  width: ${FACE_SIZE}px;\n  height: ${FACE_SIZE}px;\n  transform: ${face.css};\n  backface-visibility: hidden;\n" />`} language="javascript" />
                 </div>
               </div>
             ))}
@@ -220,7 +219,7 @@ function Step2() {
         </div>
       ))}
 
-      {/* Combined */}
+      {/* Combined cube below */}
       <div className="tutorial-combined">
         <div style={{
           perspective: '600px',
