@@ -125,17 +125,18 @@ const faceSteps: { name: string; transform: string; color: string; css: string; 
 // Also used by later steps
 const faceData = faceSteps.map(({ name, transform, color }) => ({ name, transform, color }))
 
-const GHOST_FACES = [
-  `translateZ(${HALF}px)`,
-  `rotateY(180deg) translateZ(${HALF}px)`,
-  `rotateY(-90deg) translateZ(${HALF}px)`,
-  `rotateY(90deg) translateZ(${HALF}px)`,
-  `rotateX(90deg) translateZ(${HALF}px)`,
-  `rotateX(-90deg) translateZ(${HALF}px)`,
-]
+// Fixed colors per face — distinct and memorable
+const FACE_SOLID_COLORS: Record<string, string> = {
+  front:  '#3b82f6', // blue
+  back:   '#ef4444', // red
+  left:   '#22c55e', // green
+  right:  '#f59e0b', // amber
+  top:    '#a855f7', // purple
+  bottom: '#ec4899', // pink
+}
 
 function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: number }) {
-  const [rx, ry] = face.viewAngle
+  const activeColor = FACE_SOLID_COLORS[face.name]
   return (
     <div style={{
       perspective: '500px',
@@ -146,40 +147,37 @@ function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: numbe
       height: '100%',
       minHeight: 140,
     }}>
+      {/* Always the same angle — classic isometric */}
       <div style={{
         width: size,
         height: size,
         position: 'relative',
         transformStyle: 'preserve-3d' as const,
-        transform: `rotateX(${rx}deg) rotateY(${ry}deg)`,
+        transform: 'rotateX(-25deg) rotateY(35deg)',
       }}>
-        {/* Ghost edges — all 6 positions shown as dashed outlines */}
-        {GHOST_FACES.map((t, i) => (
-          <div key={i} style={{
-            position: 'absolute',
-            width: size, height: size,
-            border: '1px dashed rgba(255,255,255,0.15)',
-            transform: t,
-          }} />
-        ))}
-        {/* Show ALL faces as dim ghosts so the cube shape is clear */}
-        {faceSteps.map((f) => (
-          <div key={f.name} style={{
-            position: 'absolute',
-            width: size, height: size,
-            background: f.name === face.name ? face.color.replace(/0\.\d+\)/, '0.6)') : 'rgba(255,255,255,0.04)',
-            border: f.name === face.name ? '2px solid rgba(255,255,255,0.8)' : '1px solid rgba(255,255,255,0.08)',
-            transform: f.transform,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: f.name === face.name ? '1rem' : '0.8rem',
-            color: f.name === face.name ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.2)',
-            fontWeight: f.name === face.name ? 700 : 400,
-          }}>
-            {f.name}
-          </div>
-        ))}
+        {/* All 6 faces rendered — inactive ones are translucent wireframe */}
+        {faceSteps.map((f) => {
+          const isActive = f.name === face.name
+          return (
+            <div key={f.name} style={{
+              position: 'absolute',
+              width: size, height: size,
+              background: isActive ? activeColor : 'rgba(255,255,255,0.03)',
+              border: isActive ? `2px solid ${activeColor}` : '1px solid rgba(255,255,255,0.12)',
+              opacity: isActive ? 0.85 : 1,
+              transform: f.transform,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.8rem',
+              color: isActive ? '#fff' : 'rgba(255,255,255,0.15)',
+              fontWeight: isActive ? 700 : 400,
+              boxShadow: isActive ? `0 0 20px ${activeColor}60, inset 0 0 15px ${activeColor}30` : 'none',
+            }}>
+              {f.name}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
