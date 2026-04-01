@@ -260,10 +260,10 @@ function Step2() {
           </div>
         </div>
         <div>
-          <p style={{ color: '#222', fontSize: '0.9375rem', fontWeight: 600, marginBottom: 8 }}>
+          <p style={{ color: '#fff', fontSize: '0.9375rem', fontWeight: 600, marginBottom: 8 }}>
             All 6 faces combined
           </p>
-          <p style={{ color: '#888', fontSize: '0.9375rem', lineHeight: 1.5 }}>
+          <p style={{ color: '#777', fontSize: '0.9375rem', lineHeight: 1.5 }}>
             Same div, 6 different transforms. Each one rotates to face a direction, then
             pushes outward by half the cube size. Together they form a hollow cube.
           </p>
