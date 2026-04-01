@@ -75,66 +75,76 @@ const faceSteps: { name: string; transform: string; color: string; css: string; 
   {
     name: 'front',
     transform: `translateZ(${HALF}px)`,
-    color: 'rgba(108,182,255,0.35)',
+    color: 'rgba(108,182,255,0.4)',
     css: `translateZ(${HALF}px)`,
-    desc: 'Push forward along Z. No rotation needed.',
-    viewAngle: [-10, 15],
+    desc: 'The simplest face. No rotation — just push forward along Z by half the cube size.',
+    viewAngle: [-15, 20],  // slightly angled, front visible
   },
   {
     name: 'back',
     transform: `rotateY(180deg) translateZ(${HALF}px)`,
-    color: 'rgba(108,182,255,0.2)',
+    color: 'rgba(255,140,108,0.4)',
     css: `rotateY(180deg) translateZ(${HALF}px)`,
-    desc: 'Rotate 180° on Y to face backward, push out.',
-    viewAngle: [-10, -160],
+    desc: 'Rotate 180° around Y so it faces the opposite direction, then push out.',
+    viewAngle: [-15, 200],  // rotated to see the back face
   },
   {
     name: 'left',
     transform: `rotateY(-90deg) translateZ(${HALF}px)`,
-    color: 'rgba(80,140,220,0.35)',
+    color: 'rgba(108,255,160,0.4)',
     css: `rotateY(-90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate -90° on Y to face left, push out.',
-    viewAngle: [-10, -55],
+    desc: 'Rotate -90° around Y to face left, then push out along its new Z.',
+    viewAngle: [-15, -70],  // looking from the left side
   },
   {
     name: 'right',
     transform: `rotateY(90deg) translateZ(${HALF}px)`,
-    color: 'rgba(80,140,220,0.25)',
+    color: 'rgba(255,200,80,0.4)',
     css: `rotateY(90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate 90° on Y to face right, push out.',
-    viewAngle: [-10, 120],
+    desc: 'Rotate 90° around Y to face right, then push out.',
+    viewAngle: [-15, 110],  // looking from the right side
   },
   {
     name: 'top',
     transform: `rotateX(90deg) translateZ(${HALF}px)`,
-    color: 'rgba(140,200,255,0.4)',
+    color: 'rgba(160,108,255,0.4)',
     css: `rotateX(90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate 90° on X to face upward, push out.',
-    viewAngle: [-60, 25],
+    desc: 'Rotate 90° around X to face upward, then push out. Uses rotateX instead of rotateY.',
+    viewAngle: [-65, 20],  // looking down from above
   },
   {
     name: 'bottom',
     transform: `rotateX(-90deg) translateZ(${HALF}px)`,
-    color: 'rgba(60,100,180,0.3)',
+    color: 'rgba(255,108,180,0.4)',
     css: `rotateX(-90deg) translateZ(${HALF}px)`,
-    desc: 'Rotate -90° on X to face downward, push out.',
-    viewAngle: [50, 25],
+    desc: 'Rotate -90° around X to face downward, then push out. All 6 faces complete the cube.',
+    viewAngle: [55, 20],  // looking up from below
   },
 ]
 
 // Also used by later steps
 const faceData = faceSteps.map(({ name, transform, color }) => ({ name, transform, color }))
 
+const GHOST_FACES = [
+  `translateZ(${HALF}px)`,
+  `rotateY(180deg) translateZ(${HALF}px)`,
+  `rotateY(-90deg) translateZ(${HALF}px)`,
+  `rotateY(90deg) translateZ(${HALF}px)`,
+  `rotateX(90deg) translateZ(${HALF}px)`,
+  `rotateX(-90deg) translateZ(${HALF}px)`,
+]
+
 function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: number }) {
-  const half = size / 2
   const [rx, ry] = face.viewAngle
   return (
     <div style={{
-      perspective: '400px',
+      perspective: '500px',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
-      gap: 8,
+      justifyContent: 'center',
+      width: '100%',
+      height: '100%',
+      minHeight: 140,
     }}>
       <div style={{
         width: size,
@@ -143,49 +153,21 @@ function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: numbe
         transformStyle: 'preserve-3d' as const,
         transform: `rotateX(${rx}deg) rotateY(${ry}deg)`,
       }}>
-        {/* Ghost outline showing the cube boundary */}
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          border: '1px dashed rgba(255,255,255,0.08)',
-          transform: `translateZ(${half}px)`,
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          border: '1px dashed rgba(255,255,255,0.08)',
-          transform: `rotateY(180deg) translateZ(${half}px)`,
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          border: '1px dashed rgba(255,255,255,0.08)',
-          transform: `rotateY(-90deg) translateZ(${half}px)`,
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          border: '1px dashed rgba(255,255,255,0.08)',
-          transform: `rotateY(90deg) translateZ(${half}px)`,
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          border: '1px dashed rgba(255,255,255,0.08)',
-          transform: `rotateX(90deg) translateZ(${half}px)`,
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          border: '1px dashed rgba(255,255,255,0.08)',
-          transform: `rotateX(-90deg) translateZ(${half}px)`,
-        }} />
+        {/* Ghost edges — lighter so they're visible */}
+        {GHOST_FACES.map((t, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            width: size, height: size,
+            border: '1px dashed rgba(255,255,255,0.15)',
+            transform: t,
+          }} />
+        ))}
         {/* The actual face */}
         <div style={{
           position: 'absolute',
           width: size, height: size,
           background: face.color.replace(/0\.\d+\)/, '0.5)'),
-          border: '1px solid rgba(108,182,255,0.8)',
+          border: '2px solid rgba(108,182,255,0.8)',
           transform: face.transform,
           backfaceVisibility: 'hidden',
           display: 'flex',
@@ -193,11 +175,11 @@ function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: numbe
           justifyContent: 'center',
           fontSize: '1rem',
           color: 'rgba(255,255,255,0.9)',
+          fontWeight: 600,
         }}>
           {face.name}
         </div>
       </div>
-      <code style={{ color: '#6cb6ff', fontSize: '1rem' }}>{face.css}</code>
     </div>
   )
 }
@@ -214,22 +196,30 @@ function Step2() {
         </p>
       </div>
 
-      {/* Individual faces — 2 column grid */}
-      <div className="tutorial-face-grid">
-        {faceSteps.map((face) => (
-          <div key={face.name} className="tutorial-face-card">
-            <div style={{ flexShrink: 0 }}>
-              <SingleFaceDemo face={face} size={70} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ color: '#999', fontSize: '1rem', lineHeight: 1.4, marginBottom: 8 }}>
-                {face.desc}
-              </p>
-              <CodeBlock code={`.${face.name} {\n  position: absolute;\n  width: ${FACE_SIZE}px;\n  height: ${FACE_SIZE}px;\n  transform: ${face.css};\n  backface-visibility: hidden;\n}`} language="javascript" />
-            </div>
+      {/* Faces stacked — paired: front+back, left+right, top+bottom */}
+      {[
+        { pair: [faceSteps[0], faceSteps[1]], label: 'Front & Back — the Z axis' },
+        { pair: [faceSteps[2], faceSteps[3]], label: 'Left & Right — the X axis' },
+        { pair: [faceSteps[4], faceSteps[5]], label: 'Top & Bottom — the Y axis' },
+      ].map(({ pair, label }) => (
+        <div key={label} style={{ marginBottom: 24 }}>
+          <p style={{ color: '#888', fontSize: '0.9375rem', marginBottom: 12, fontWeight: 500 }}>{label}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {pair.map((face) => (
+              <div key={face.name} className="tutorial-face-row">
+                <div className="tutorial-face-row-demo">
+                  <SingleFaceDemo face={face} size={80} />
+                </div>
+                <div className="tutorial-face-row-info">
+                  <p style={{ color: '#222', fontSize: '0.9375rem', fontWeight: 600, marginBottom: 4 }}>{face.name}</p>
+                  <p style={{ color: '#888', fontSize: '0.9375rem', lineHeight: 1.5, marginBottom: 10 }}>{face.desc}</p>
+                  <CodeBlock code={`<div style="\n  position: absolute;\n  width: ${FACE_SIZE}px;\n  height: ${FACE_SIZE}px;\n  transform: ${face.css};\n  backface-visibility: hidden;\n" />`} language="javascript" />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
       {/* Combined */}
       <div className="tutorial-combined">
@@ -272,10 +262,10 @@ function Step2() {
           </div>
         </div>
         <div>
-          <p style={{ color: '#fff', fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>
+          <p style={{ color: '#222', fontSize: '0.9375rem', fontWeight: 600, marginBottom: 8 }}>
             All 6 faces combined
           </p>
-          <p style={{ color: '#666', fontSize: '1rem', lineHeight: 1.5 }}>
+          <p style={{ color: '#888', fontSize: '0.9375rem', lineHeight: 1.5 }}>
             Same div, 6 different transforms. Each one rotates to face a direction, then
             pushes outward by half the cube size. Together they form a hollow cube.
           </p>
