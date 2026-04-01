@@ -153,7 +153,7 @@ function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: numbe
         transformStyle: 'preserve-3d' as const,
         transform: `rotateX(${rx}deg) rotateY(${ry}deg)`,
       }}>
-        {/* Ghost edges — lighter so they're visible */}
+        {/* Ghost edges — all 6 positions shown as dashed outlines */}
         {GHOST_FACES.map((t, i) => (
           <div key={i} style={{
             position: 'absolute',
@@ -162,23 +162,24 @@ function SingleFaceDemo({ face, size }: { face: typeof faceSteps[0]; size: numbe
             transform: t,
           }} />
         ))}
-        {/* The actual face */}
-        <div style={{
-          position: 'absolute',
-          width: size, height: size,
-          background: face.color.replace(/0\.\d+\)/, '0.5)'),
-          border: '2px solid rgba(108,182,255,0.8)',
-          transform: face.transform,
-          backfaceVisibility: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1rem',
-          color: 'rgba(255,255,255,0.9)',
-          fontWeight: 600,
-        }}>
-          {face.name}
-        </div>
+        {/* Show ALL faces as dim ghosts so the cube shape is clear */}
+        {faceSteps.map((f) => (
+          <div key={f.name} style={{
+            position: 'absolute',
+            width: size, height: size,
+            background: f.name === face.name ? face.color.replace(/0\.\d+\)/, '0.6)') : 'rgba(255,255,255,0.04)',
+            border: f.name === face.name ? '2px solid rgba(255,255,255,0.8)' : '1px solid rgba(255,255,255,0.08)',
+            transform: f.transform,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: f.name === face.name ? '1rem' : '0.8rem',
+            color: f.name === face.name ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.2)',
+            fontWeight: f.name === face.name ? 700 : 400,
+          }}>
+            {f.name}
+          </div>
+        ))}
       </div>
     </div>
   )
